@@ -164,4 +164,34 @@ const deleteApplication = async (req, res) => {
     }
 };
 
-module.exports = { addApplication, getAllApplication, getApplicationById, updateApplication, deleteApplication };
+const updateNoResponseStatus = async (req, res) => {
+    try {
+        const user = req.user;
+
+        const tenDaysAgo = new Date();
+        tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+
+        const applications = await Application.find({ user: user._id, status: "Applied", appliedDate: { $lt: tenDaysAgo } });
+
+        if (applications.length === 0) {
+            return res.status(200).json({ message: 'No application found' });
+        }
+
+        await Application.updateMany(
+            { user: user._id, status: "Applied", appliedDate: { $lt: tenDaysAgo } },
+            { $set: { status: 'No Response' } }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Application status updated successfully',
+            data: {
+                count: applications.length,
+                applications
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+module.exports = { addApplication, getAllApplication, getApplicationById, updateApplication, deleteApplication, updateNoResponseStatus };
