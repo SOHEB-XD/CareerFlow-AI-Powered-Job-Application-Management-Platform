@@ -10,7 +10,6 @@ const addApplication = async (req, res) => {
         }
 
 
-
         const normalizedCompany = companyName.trim().toLowerCase();
         const normalizedRole = role.trim().toLowerCase();
 
@@ -46,4 +45,123 @@ const addApplication = async (req, res) => {
     }
 };
 
-module.exports = { addApplication };
+const getAllApplication = async (req, res) => {
+    try {
+        const user = req.user;
+        const { page = 1, limit = 5, search, status } = req.query;
+
+        const pageNumber = parseInt(page);
+        const limitNumber = parseInt(limit);
+
+        const skip = (pageNumber - 1) * limitNumber;
+
+        const filter = {
+            user: user._id
+        };
+
+        if (search) {
+            filter.$or = [
+                {
+                    companyName: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                },
+                {
+                    role: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                }
+            ];
+        }
+
+        if (status) {
+            filter.status = status;
+        }
+
+
+
+        const applications = await Application.find(filter).skip(skip).limit(limitNumber);
+
+        if (applications.length === 0) {
+            return res.status(404).json({ message: 'No applications found' });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Applications fetched successfully',
+            data: applications
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const getApplicationById = async (req, res) => {
+    try {
+        const user = req.user;
+        const { id } = req.params;
+
+        const application = await Application.findOne({ _id: id, user: user._id });
+
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Application fetched successfully',
+            data: application
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const updateApplication = async (req, res) => {
+    try {
+        const user = req.user;
+        const { id } = req.params;
+        const { companyName, role, status, applicationSource, appliedDate, companyWebsite, hrEmail, notes } = req.body;
+
+        const application = await Application.findOneAndUpdate({ _id: id, user: user._id }, { companyName, role, status, applicationSource, appliedDate, companyWebsite, hrEmail, notes }, { new: true, runValidators: true });
+
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Application updated successfully',
+            data: application
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+
+};
+
+const deleteApplication = async (req, res) => {
+    try {
+        const user = req.user;
+        const { id } = req.params;
+
+        const application = await Application.findOne({ _id: id, user: user._id });
+
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+
+        await application.deleteOne();
+
+        res.status(200).json({
+            success: true,
+            message: 'Application deleted successfully'
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { addApplication, getAllApplication, getApplicationById, updateApplication, deleteApplication };
