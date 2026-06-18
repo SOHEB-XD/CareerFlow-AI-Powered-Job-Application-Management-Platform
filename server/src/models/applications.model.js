@@ -1,6 +1,17 @@
 const mongoose = require('mongoose');
 
 const applicationSchema = new mongoose.Schema({
+
+    normalizedCompany: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    normalizedRole: {
+        type: String,
+        required: true,
+        trim: true
+    },
     companyName: {
         type: String,
         required: true,
@@ -19,7 +30,8 @@ const applicationSchema = new mongoose.Schema({
     applicationSource: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        default: ''
     },
     appliedDate: {
         type: Date,
@@ -28,19 +40,23 @@ const applicationSchema = new mongoose.Schema({
     },
     companyWebsite: {
         type: String,
-        trim: true
+        trim: true,
+        default: ''
     },
     hrEmail: {
         type: String,
         trim: true,
-        lowercase: true
+        lowercase: true,
+        default: ''
     },
     notes: {
         type: String,
-        maxlenght: 1500
+        maxlenght: 1500,
+        default: ''
     },
     interviewDate: {
-        type: Date
+        type: Date,
+        default: null
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,

@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const dotenv = require("dotenv");
 dotenv.config();
 const authRoutes = require('./routes/auth.route');
+const applicationRoutes = require('./routes/applications.route');
 
 const app = express();
 app.use(cors());
@@ -11,6 +12,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
-app.use("/api/job", jobRoutes);
+app.use("/api/applications", applicationRoutes);
+
 
 module.exports = app
