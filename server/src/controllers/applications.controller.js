@@ -123,11 +123,14 @@ const updateApplication = async (req, res) => {
     try {
         const user = req.user;
         const { id } = req.params;
-        const { companyName, role, status, applicationSource, appliedDate, companyWebsite, hrEmail, notes } = req.body;
+        const { companyName, role, status, applicationSource, appliedDate, companyWebsite, hrEmail, notes, interviewDate } = req.body;
 
-        const application = await Application.findOneAndUpdate({ _id: id, user: user._id }, { companyName, role, status, applicationSource, appliedDate, companyWebsite, hrEmail, notes }, { new: true, runValidators: true });
+        if (status === 'Interview Scheduled' && !interviewDate)
+            return res.status(400).json({ message: 'Please Provide Interview Date' });
 
-        if (!application) {
+        const application = await Application.findOneAndUpdate({ _id: id, user: user._id }, { companyName, role, status, applicationSource, appliedDate, companyWebsite, hrEmail, notes, interviewDate }, { new: true, runValidators: true });
+
+        if (application.length === 0) {
             return res.status(404).json({ message: 'Application not found' });
         }
 
