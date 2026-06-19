@@ -197,4 +197,29 @@ const updateNoResponseStatus = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-module.exports = { addApplication, getAllApplication, getApplicationById, updateApplication, deleteApplication, updateNoResponseStatus };
+
+const getUpcomingInterviews = async (req, res) => {
+    try {
+        const user = req.user;
+
+        const today = new Date();
+
+        const applications = await Application.find({ user: user._id, status: 'Interview Scheduled', interviewDate: { $gte: today } })
+            .sort({ interviewDate: 1 })
+            .select('companyName role interviewDate');
+
+        if (applications.length === 0) {
+            return res.status(200).json({ message: 'No upcoming interviews found' });
+        }
+
+
+        res.status(200).json({
+            success: true,
+            message: 'Upcoming interviews fetched successfully',
+            data: applications
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+module.exports = { addApplication, getAllApplication, getApplicationById, updateApplication, deleteApplication, updateNoResponseStatus, getUpcomingInterviews };
