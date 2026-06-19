@@ -125,7 +125,7 @@ const updateApplication = async (req, res) => {
         const { id } = req.params;
         const { companyName, role, status, applicationSource, appliedDate, companyWebsite, hrEmail, notes, interviewDate } = req.body;
 
-        if (status === 'Interview Scheduled' && !interviewDate)
+        if (status === ('Interview Scheduled' || 'Technical Round' || 'HR Round') && !interviewDate)
             return res.status(400).json({ message: 'Please Provide Interview Date' });
 
         const application = await Application.findOneAndUpdate({ _id: id, user: user._id }, { companyName, role, status, applicationSource, appliedDate, companyWebsite, hrEmail, notes, interviewDate }, { new: true, runValidators: true });
@@ -204,14 +204,19 @@ const getUpcomingInterviews = async (req, res) => {
 
         const today = new Date();
 
-        const applications = await Application.find({ user: user._id, status: 'Interview Scheduled', interviewDate: { $gte: today } })
+        const applications = await Application.find({
+            user: user._id,
+            status: {
+                $in: [
+                    "Interview Scheduled",
+                    "Technical Round",
+                    "HR Round"
+                ]
+            },
+            interviewDate: { $gte: today }
+        })
             .sort({ interviewDate: 1 })
             .select('companyName role interviewDate');
-
-        if (applications.length === 0) {
-            return res.status(200).json({ message: 'No upcoming interviews found' });
-        }
-
 
         res.status(200).json({
             success: true,
