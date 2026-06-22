@@ -5,8 +5,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const authRoutes = require('./routes/auth.route');
 const applicationRoutes = require('./routes/applications.route');
-const dashboardRoutes = require('./routes/dashboard.route');
-const followUpSuggestionAIRoutes = require('./routes/followUpSuggestionAI.routes.js');
+const featuresRoutes = require('./routes/features.route');
 
 const app = express();
 app.use(cors());
@@ -15,9 +14,8 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/applications", applicationRoutes);
-app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/features", featuresRoutes);
 
-app.use("/api/follow-up", followUpSuggestionAIRoutes);
 
 
 

@@ -2,7 +2,7 @@ const Application = require('../models/applications.model');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Communication = require('../models/communication.model');
 
-const getFollowUpSuggestions = async (req, res) => {
+const getFollowUpEmail = async (req, res) => {
     try {
         const user = req.user;
         const { id } = req.params;
@@ -94,4 +94,4 @@ const getFollowUpSuggestions = async (req, res) => {
     }
 };
 
-module.exports = { getFollowUpSuggestions };
+module.exports = { getFollowUpEmail };

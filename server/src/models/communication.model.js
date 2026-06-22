@@ -4,8 +4,19 @@ const communicationSchema = new mongoose.Schema(
     {
         application: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Application",
-            required: true
+            ref: "Application"
+        },
+
+        companyName: {
+            type: String
+        },
+
+        role: {
+            type: String
+        },
+
+        hrEmail: {
+            type: String
         },
 
         user: {
@@ -35,9 +46,13 @@ const communicationSchema = new mongoose.Schema(
             required: true
         },
 
-        sent: {
-            type: Boolean,
-            default: false
+        status: {
+            type: String,
+            enum: [
+                "draft",
+                "sent"
+            ],
+            default: "draft"
         },
 
         sentAt: {
