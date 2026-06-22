@@ -8,14 +8,20 @@ const getTargetCompanyPreview = async (req, res) => {
         const { companyName, role, jobDescription, hrEmail } = req.body;
         const user = req.user;
 
-        if (!companyName || !role) {
+        if (!companyName.trim() || !role.trim()) {
             return res.status(400).json({ success: false, message: 'Please provide company name and role' });
         }
 
+        const normalizedCompany =
+            companyName.trim().toLowerCase();
+
+        const normalizedRole =
+            role.trim().toLowerCase();
+
         const applicationExist = await Application.findOne({
             user: user._id,
-            companyName: companyName,
-            role: role,
+            normalizedCompany: normalizedCompany,
+            normalizedRole: normalizedRole,
         });
 
         if (applicationExist) {
@@ -28,8 +34,8 @@ const getTargetCompanyPreview = async (req, res) => {
 
         const existingDraft = await Communication.findOne({
             user: user._id,
-            companyName: companyName,
-            role: role,
+            companyName: normalizedCompany,
+            role: normalizedRole,
             type: "application",
             status: "draft"
         });
@@ -110,14 +116,23 @@ const getTargetCompanyPreview = async (req, res) => {
         const response = await result.response;
         const text = await response.text();
 
-        const emailData = JSON.parse(text);
+        let emailData;
+
+        try {
+            emailData = JSON.parse(text);
+        } catch {
+            return res.status(500).json({
+                success: false,
+                message: "Invalid AI response"
+            });
+        }
 
         await Communication.create({
             user: user._id,
 
-            companyName: companyName,
+            companyName: normalizedCompany,
 
-            role: role,
+            role: normalizedRole,
 
             type: "application",
 
@@ -164,6 +179,14 @@ const getGmailLink = async (req, res) => {
             });
         }
 
+        if (!communication.hrEmail) {
+            return res.status(404).json({
+                success: false,
+                message: "HR Email not found",
+                communicationId: communication._id
+            });
+        }
+
         const gmailUrl =
             `https://mail.google.com/mail/?view=cm&fs=1` +
             `&to=${encodeURIComponent(communication.hrEmail)}` +
@@ -188,22 +211,22 @@ const markSend = async (req, res) => {
         const user = req.user;
         const { id } = req.params;
 
-        const communication = await Communication.findOneAndUpdate({
+        const communication = await Communication.findOne({
             _id: id,
             user: user._id,
-        }, {
-            $set: {
-                status: "sent",
-                sentAt: new Date(),
-            }
-        }, {
-            new: true
         });
 
         if (!communication) {
             return res.status(404).json({
                 success: false,
                 message: "Communication not found"
+            });
+        }
+
+        if (communication.status === "sent") {
+            return res.status(400).json({
+                success: false,
+                message: "Communication already sent"
             });
         }
 
@@ -218,9 +241,21 @@ const markSend = async (req, res) => {
             role: communication.role,
             status: "Applied",
             applicationSource: "Email",
-            appliedDate: communication.sentAt,
+            appliedDate: new Date(),
             hrEmail: communication.hrEmail,
-            notes: `No Notes`
+            notes: ""
+        });
+
+        await Communication.findOneAndUpdate({
+            _id: id,
+            user: user._id,
+        }, {
+            $set: {
+                status: "sent",
+                sentAt: new Date(),
+            }
+        }, {
+            new: true
         });
 
         res.status(200).json({

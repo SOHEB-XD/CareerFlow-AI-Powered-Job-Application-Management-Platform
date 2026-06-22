@@ -6,6 +6,7 @@ const uploadResume = require('../controllers/uploadreume.controller');
 const { getTargetCompanyPreview, getGmailLink, markSend } = require('../features/targetCompanyAI.feature');
 const { getDraftFollowUpEmails } = require('../features/getDraftEmails.feature');
 const { getDraftApplicationEmails } = require('../features/getDraftEmails.feature');
+const { getCommunications } = require('../features/getCommunications.feature');
 
 /**
  * Dashboard feature API
@@ -35,5 +36,10 @@ router.patch('/target-company/:id/mark-sent', protect, markSend);
  */
 router.get('/draft-follow-up-emails', protect, getDraftFollowUpEmails);
 router.get('/draft-application-emails', protect, getDraftApplicationEmails);
+
+/**
+ * Communications feature API
+ */
+router.get('/communications', protect, getCommunications);
 
 module.exports = router;
