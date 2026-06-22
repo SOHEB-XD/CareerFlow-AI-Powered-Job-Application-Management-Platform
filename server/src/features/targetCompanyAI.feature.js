@@ -12,19 +12,34 @@ const getTargetCompanyPreview = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Please provide company name and role' });
         }
 
-        const isCompanyAlreadyExist = await Communication.findOne({
+        const applicationExist = await Application.findOne({
             user: user._id,
             companyName: companyName,
             role: role,
-            type: "application"
         });
 
-        if (isCompanyAlreadyExist) {
+        if (applicationExist) {
+            return res.status(200).json({
+                success: true,
+                message: 'Application already exists for this company and role',
+                data: applicationExist
+            });
+        }
+
+        const existingDraft = await Communication.findOne({
+            user: user._id,
+            companyName: companyName,
+            role: role,
+            type: "application",
+            status: "draft"
+        });
+
+        if (existingDraft) {
             return res.status(200).json({
                 success: true,
                 message: 'Application already exists for this company and role',
                 cached: true,
-                data: isCompanyAlreadyExist
+                data: existingDraft
             });
         }
 
@@ -167,4 +182,58 @@ const getGmailLink = async (req, res) => {
         });
     }
 };
-module.exports = { getTargetCompanyPreview, getGmailLink };
+
+const markSend = async (req, res) => {
+    try {
+        const user = req.user;
+        const { id } = req.params;
+
+        const communication = await Communication.findOneAndUpdate({
+            _id: id,
+            user: user._id,
+        }, {
+            $set: {
+                status: "sent",
+                sentAt: new Date(),
+            }
+        }, {
+            new: true
+        });
+
+        if (!communication) {
+            return res.status(404).json({
+                success: false,
+                message: "Communication not found"
+            });
+        }
+
+        const normalizedCompany = communication.companyName.toLowerCase().trim();
+        const normalizedRole = communication.role.toLowerCase().trim();
+
+        const application = await Application.create({
+            user: user._id,
+            normalizedCompany: normalizedCompany,
+            normalizedRole: normalizedRole,
+            companyName: communication.companyName,
+            role: communication.role,
+            status: "Applied",
+            applicationSource: "Email",
+            appliedDate: communication.sentAt,
+            hrEmail: communication.hrEmail,
+            notes: `No Notes`
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Communication marked as sent",
+            application: application
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
+module.exports = { getTargetCompanyPreview, getGmailLink, markSend };

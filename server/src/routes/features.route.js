@@ -3,7 +3,7 @@ const { getDashboardStats, getRecentApplications } = require('../controllers/das
 const { protect } = require('../middlewares/auth.middleware');
 const { getFollowUpEmail } = require('../features/followUpEmailAI.feature');
 const uploadResume = require('../controllers/uploadreume.controller');
-const { getTargetCompanyPreview, getGmailLink } = require('../features/targetCompanyAI.feature');
+const { getTargetCompanyPreview, getGmailLink, markSend } = require('../features/targetCompanyAI.feature');
 const { getDraftFollowUpEmails } = require('../features/getDraftEmails.feature');
 const { getDraftApplicationEmails } = require('../features/getDraftEmails.feature');
 
@@ -28,6 +28,7 @@ router.post('/resume/upload', protect, uploadResume);
  */
 router.post('/target-company/preview', protect, getTargetCompanyPreview);
 router.post('/target-company/:id/get-gmail-link', protect, getGmailLink);
+router.patch('/target-company/:id/mark-sent', protect, markSend);
 
 /**
  * Draft Emails feature API
