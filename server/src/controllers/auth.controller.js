@@ -93,4 +93,22 @@ const getMe = (req, res) => {
     }
 }
 
-module.exports = { register, login, getMe };
+const logout = async (req, res) => {
+    try {
+        res.cookie('token', '', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            expires: new Date(0),
+            sameSite: 'strict'
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'User logged out successfully'
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { register, login, getMe, logout };

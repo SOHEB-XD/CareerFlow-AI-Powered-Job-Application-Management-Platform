@@ -1,11 +1,16 @@
 const Application = require('../models/applications.model');
+const mongoose = require('mongoose');
 
 const addApplication = async (req, res) => {
     try {
         let { companyName, role, applicationSource, appliedDate, companyWebsite, hrEmail, notes } = req.body;
         const user = req.user;
 
-        if (!companyName || !role || !applicationSource) {
+        if (
+            !companyName || typeof companyName !== 'string' || !companyName.trim() ||
+            !role || typeof role !== 'string' || !role.trim() ||
+            !applicationSource || typeof applicationSource !== 'string' || !applicationSource.trim()
+        ) {
             return res.status(400).json({ message: 'Please provide all the required fields' });
         }
 
@@ -24,10 +29,10 @@ const addApplication = async (req, res) => {
             companyName: companyName.trim(),
             role: role.trim(),
             applicationSource: applicationSource.trim(),
-            appliedDate,
-            companyWebsite: companyWebsite.trim(),
-            hrEmail: hrEmail.trim(),
-            notes: notes.trim(),
+            appliedDate: appliedDate || undefined,
+            companyWebsite: typeof companyWebsite === 'string' ? companyWebsite.trim() : '',
+            hrEmail: typeof hrEmail === 'string' ? hrEmail.trim() : '',
+            notes: typeof notes === 'string' ? notes.trim() : '',
             user: user._id
         });
 
@@ -84,10 +89,6 @@ const getAllApplication = async (req, res) => {
 
         const applications = await Application.find(filter).skip(skip).limit(limitNumber);
 
-        if (applications.length === 0) {
-            return res.status(404).json({ message: 'No applications found' });
-        }
-
         res.status(200).json({
             success: true,
             message: 'Applications fetched successfully',
@@ -102,6 +103,10 @@ const getApplicationById = async (req, res) => {
     try {
         const user = req.user;
         const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'Invalid application ID' });
+        }
 
         const application = await Application.findOne({ _id: id, user: user._id });
 
@@ -123,16 +128,47 @@ const updateApplication = async (req, res) => {
     try {
         const user = req.user;
         const { id } = req.params;
-        const { companyName, role, status, applicationSource, appliedDate, companyWebsite, hrEmail, notes, interviewDate } = req.body;
+        const { companyName, role, status, applicationSource, appliedDate, companyWebsite, hrEmail, notes, interviewDate } = req.body || {};
 
-        if (status === ('Interview Scheduled' || 'Technical Round' || 'HR Round') && !interviewDate)
-            return res.status(400).json({ message: 'Please Provide Interview Date' });
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'Invalid application ID' });
+        }
 
-        const application = await Application.findOneAndUpdate({ _id: id, user: user._id }, { companyName, role, status, applicationSource, appliedDate, companyWebsite, hrEmail, notes, interviewDate }, { new: true, runValidators: true });
-
-        if (application.length === 0) {
+        const existingApplication = await Application.findOne({ _id: id, user: user._id });
+        if (!existingApplication) {
             return res.status(404).json({ message: 'Application not found' });
         }
+
+        const interviewStatuses = ['Interview Scheduled', 'Technical Round', 'HR Round'];
+        const targetStatus = status !== undefined ? status : existingApplication.status;
+        const effectiveInterviewDate = interviewDate !== undefined ? interviewDate : existingApplication.interviewDate;
+
+        if (interviewStatuses.includes(targetStatus) && !effectiveInterviewDate) {
+            return res.status(400).json({ message: 'Please Provide Interview Date' });
+        }
+
+        const updateData = {};
+        if (companyName !== undefined) {
+            updateData.companyName = typeof companyName === 'string' ? companyName.trim() : companyName;
+            updateData.normalizedCompany = typeof companyName === 'string' ? companyName.trim().toLowerCase() : companyName;
+        }
+        if (role !== undefined) {
+            updateData.role = typeof role === 'string' ? role.trim() : role;
+            updateData.normalizedRole = typeof role === 'string' ? role.trim().toLowerCase() : role;
+        }
+        if (status !== undefined) updateData.status = status;
+        if (applicationSource !== undefined) updateData.applicationSource = typeof applicationSource === 'string' ? applicationSource.trim() : applicationSource;
+        if (appliedDate !== undefined) updateData.appliedDate = appliedDate;
+        if (companyWebsite !== undefined) updateData.companyWebsite = typeof companyWebsite === 'string' ? companyWebsite.trim() : '';
+        if (hrEmail !== undefined) updateData.hrEmail = typeof hrEmail === 'string' ? hrEmail.trim() : '';
+        if (notes !== undefined) updateData.notes = typeof notes === 'string' ? notes.trim() : '';
+        if (interviewDate !== undefined) updateData.interviewDate = interviewDate;
+
+        const application = await Application.findOneAndUpdate(
+            { _id: id, user: user._id },
+            updateData,
+            { new: true, runValidators: true }
+        );
 
         res.status(200).json({
             success: true,
@@ -140,6 +176,9 @@ const updateApplication = async (req, res) => {
             data: application
         });
     } catch (error) {
+        if (error.name === 'CastError' || error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
         res.status(500).json({ message: error.message });
     }
 
@@ -149,6 +188,10 @@ const deleteApplication = async (req, res) => {
     try {
         const user = req.user;
         const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'Invalid application ID' });
+        }
 
         const application = await Application.findOne({ _id: id, user: user._id });
 
@@ -163,6 +206,9 @@ const deleteApplication = async (req, res) => {
             message: 'Application deleted successfully'
         });
     } catch (error) {
+        if (error.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid application ID' });
+        }
         res.status(500).json({ message: error.message });
     }
 };

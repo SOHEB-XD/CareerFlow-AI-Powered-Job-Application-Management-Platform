@@ -1,4 +1,12 @@
 {
+  "name": "job-application-tracker-server",
+  "version": "1.0.0",
+  "description": "Job Application Tracker Server",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon server.js"
+  },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^3.0.3",

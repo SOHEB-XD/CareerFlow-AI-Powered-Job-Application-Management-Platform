@@ -25,24 +25,26 @@ const getDashboardStats = async (req, res) => {
             }
         ]);
 
-        const { totalApplications, applied, technicalRound, hrRound, offerLetter, rejected, withdrawn, interviewScheduled, noResponse } = applications[0];
-
-        if (!applications.length === 0) {
+        // Guard: no applications yet — return all-zero stats
+        if (applications.length === 0) {
             return res.status(200).json({
                 success: true,
+                message: 'Dashboard stats fetched successfully',
                 data: {
                     totalApplications: 0,
                     applied: 0,
+                    interviewScheduled: 0,
                     technicalRound: 0,
                     hrRound: 0,
                     offerLetter: 0,
                     rejected: 0,
                     withdrawn: 0,
-                    interviewScheduled: 0,
                     noResponse: 0
                 }
             });
         }
+
+        const { totalApplications, applied, technicalRound, hrRound, offerLetter, rejected, withdrawn, interviewScheduled, noResponse } = applications[0];
 
         res.status(200).json({
             success: true,

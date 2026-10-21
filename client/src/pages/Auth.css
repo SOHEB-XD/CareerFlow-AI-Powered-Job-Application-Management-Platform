@@ -1,0 +1,554 @@
+/* =============================================================================
+   CAREERFLOW — AUTHENTICATION PAGES (LOGIN & REGISTER)
+   Design Language: Pure Black (#000000), Pure White (#FFFFFF) & Pure Blue (#0000FF)
+   Display Typography: Sora
+   UI / Body: DM Sans
+   ============================================================================= */
+
+:root {
+  --cf-black: #000000;
+  --cf-white: #FFFFFF;
+  --cf-blue: #0000FF;
+  --font-display: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-main: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cf-auth-page {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  background: var(--cf-white);
+  color: var(--cf-black);
+  font-family: var(--font-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ── Left: Form Area ── */
+.cf-auth-form-side {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(2rem, 5vw, 4.5rem);
+  background: var(--cf-white);
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Right: Brand Area (Desktop) ── */
+.cf-auth-brand-side {
+  min-width: 0;
+  background: var(--cf-black);
+  color: var(--cf-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(3rem, 6vw, 6rem) clamp(2.5rem, 5vw, 5rem);
+  position: relative;
+  overflow: hidden;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ── Top Header / Logo Bar ── */
+.cf-auth-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: clamp(2rem, 4vh, 3.5rem);
+}
+
+.cf-auth-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--cf-black);
+}
+
+.cf-auth-logo .cf-logo-mark {
+  width: 24px;
+  height: 24px;
+  background: var(--cf-blue);
+  position: relative;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.cf-auth-logo .cf-logo-mark::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 7px;
+  height: 7px;
+  background: var(--cf-white);
+  border-radius: 1px;
+}
+
+.cf-auth-logo .cf-logo-text {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cf-black);
+}
+
+.cf-auth-home-link {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.55);
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.cf-auth-home-link:hover {
+  color: var(--cf-blue);
+  transform: translateX(-2px);
+}
+
+/* ── Form Card & Typography ── */
+.cf-auth-form-card {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.cf-auth-header {
+  margin-bottom: 2rem;
+}
+
+.cf-auth-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.2vw, 2.45rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  color: var(--cf-black);
+  margin-bottom: 0.65rem;
+}
+
+.cf-auth-desc {
+  font-family: var(--font-main);
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+/* ── Error Banner ── */
+.cf-auth-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--cf-white);
+  border: 1px solid rgba(0, 0, 255, 0.3);
+  border-left: 3px solid var(--cf-blue);
+  border-radius: 6px;
+  color: var(--cf-black);
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 255, 0.08);
+}
+
+.cf-auth-alert-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--cf-blue);
+}
+
+/* ── Form Groups & Inputs ── */
+.cf-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cf-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cf-form-label {
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cf-black);
+}
+
+.cf-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cf-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  background: var(--cf-white);
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 6px;
+  color: var(--cf-black);
+  font-size: 14px;
+  font-family: var(--font-main);
+  line-height: normal;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  -webkit-appearance: none;
+}
+
+.cf-input:hover:not(:disabled) {
+  border-color: rgba(0, 0, 0, 0.4);
+}
+
+.cf-input:focus {
+  border-color: var(--cf-blue);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 0, 255, 0.12);
+}
+
+.cf-input:disabled {
+  background: rgba(0, 0, 0, 0.02);
+  color: rgba(0, 0, 0, 0.4);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.cf-input.has-error {
+  border-color: var(--cf-blue);
+  box-shadow: 0 0 0 2px rgba(0, 0, 255, 0.15);
+}
+
+.cf-password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 6px;
+  color: rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.cf-password-toggle:hover {
+  color: var(--cf-black);
+}
+
+.cf-field-hint {
+  font-family: var(--font-main);
+  font-size: 11.5px;
+  color: rgba(0, 0, 0, 0.5);
+  margin-top: 2px;
+}
+
+.cf-field-error {
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--cf-blue);
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+/* ── Primary Submit Button ── */
+.cf-auth-submit-btn {
+  margin-top: 0.5rem;
+  width: 100%;
+  height: 48px;
+  padding: 0 24px;
+  background: var(--cf-blue);
+  color: var(--cf-white);
+  border: none;
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-family: var(--font-display);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 255, 0.24);
+  transition: transform 0.15s var(--ease-editorial), box-shadow 0.15s var(--ease-editorial), background 0.15s ease;
+}
+
+.cf-auth-submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 255, 0.35);
+  background: #0000EE;
+}
+
+.cf-auth-submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 255, 0.2);
+}
+
+.cf-auth-submit-btn:disabled {
+  background: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.35);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Spinner */
+.cf-auth-spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--cf-white);
+  border-radius: 50%;
+  animation: cf-spin 0.65s linear infinite;
+  display: inline-block;
+}
+
+@keyframes cf-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Switcher & Footer ── */
+.cf-auth-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cf-auth-switch-link {
+  color: var(--cf-blue);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: opacity 0.15s ease;
+}
+
+.cf-auth-switch-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.cf-auth-legal {
+  margin-top: clamp(2rem, 4vh, 3.5rem);
+  font-size: 11.5px;
+  color: rgba(0, 0, 0, 0.45);
+  line-height: 1.5;
+}
+
+/* ── Brand Area Styling (Solid Black Side) ── */
+.cf-auth-brand-content {
+  max-width: 440px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.cf-auth-brand-eyebrow {
+  display: block;
+  margin-bottom: 1.25rem;
+}
+
+.cf-auth-eyebrow-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  opacity: 0.6;
+}
+
+.cf-auth-brand-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: #FFFFFF;
+  margin-bottom: 1.25rem;
+}
+
+.cf-auth-brand-h2 em {
+  font-style: italic;
+  font-weight: 300;
+  color: #FFFFFF;
+}
+
+.cf-auth-brand-desc {
+  font-family: var(--font-main);
+  font-size: 14px;
+  line-height: 1.6;
+  color: #FFFFFF;
+  opacity: 0.7;
+  margin-bottom: 2.75rem;
+  max-width: 400px;
+}
+
+/* ── Mini Preview Cards Stack (2 Cards Max) ── */
+.cf-auth-cards-stack {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cf-preview-card {
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  transition: border-color 0.2s ease, transform 0.2s var(--ease-editorial), box-shadow 0.2s var(--ease-editorial);
+}
+
+.cf-preview-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
+}
+
+.cf-preview-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cf-preview-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cf-preview-avatar {
+  width: 26px;
+  height: 26px;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #FFFFFF;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.cf-preview-company {
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.01em;
+}
+
+.cf-preview-role {
+  font-family: var(--font-main);
+  font-size: 11.5px;
+  color: #FFFFFF;
+  opacity: 0.65;
+  margin-top: 1px;
+}
+
+.cf-preview-pill {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 3px;
+  background: var(--cf-blue);
+  color: #FFFFFF;
+  flex-shrink: 0;
+}
+
+.cf-preview-pill.neutral {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+
+.cf-preview-card-footer {
+  display: flex;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 11.5px;
+}
+
+.cf-preview-next {
+  font-family: var(--font-main);
+  color: #FFFFFF;
+  opacity: 0.8;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Responsive Mobile ── */
+@media (max-width: 960px) {
+  .cf-auth-page {
+    grid-template-columns: 1fr;
+  }
+
+  .cf-auth-form-side {
+    max-width: 100%;
+    padding: 2rem 1.5rem 3rem;
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
+  .cf-auth-brand-side {
+    display: none;
+  }
+
+  .cf-auth-form-card {
+    max-width: 100%;
+  }
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .cf-auth-submit-btn,
+  .cf-preview-card,
+  .cf-input,
+  .cf-auth-spinner {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}

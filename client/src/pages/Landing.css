@@ -1,0 +1,1778 @@
+﻿/* =============================================================================
+   CAREERFLOW — DEFINITIVE 3-COLOUR EDITORIAL SYSTEM
+   Palette (Strict Override):
+     - Pure Black: #000000
+     - Pure White: #FFFFFF
+     - Pure Blue:  #0000FF
+   Typography:
+     - Display: Sora
+     - UI / Body: DM Sans
+   ============================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Sora:wght@100..800&display=swap');
+
+/* ── SCOPED TOKENS ─────────────────────────────────────────────────────────── */
+.cf-landing {
+  --cf-black: #000000;
+  --cf-white: #FFFFFF;
+  --cf-blue: #0000FF;
+
+  --font-display: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-main: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --nav-height: 74px;
+  --max-w: 1380px;
+  --gutter: clamp(1.5rem, 6vw, 4.5rem);
+  --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Premium Layered Shadow System (Restrained alpha depth) */
+  --shadow-resting: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-elevated: 0 18px 48px rgba(0, 0, 0, 0.14);
+  --shadow-hover: 0 24px 56px rgba(0, 0, 0, 0.18);
+  --shadow-blue-cta: 0 8px 24px rgba(0, 0, 255, 0.22);
+
+  font-family: var(--font-main);
+  background: var(--cf-black);
+  color: var(--cf-white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* ── RESET WITHIN LANDING ─────────────────────────────────────────────────── */
+.cf-landing *,
+.cf-landing *::before,
+.cf-landing *::after {
+  box-sizing: border-box;
+}
+
+.cf-landing a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cf-landing em {
+  font-style: italic;
+}
+
+.cf-container {
+  width: 100%;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.cf-section {
+  position: relative;
+  width: 100%;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   APPROVED HERO & NAVIGATION (FROZEN — UNCHANGED)
+   ═════════════════════════════════════════════════════════════════════════════ */
+.cf-landing .cf-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-height);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background 0.25s var(--ease-editorial), border-color 0.25s var(--ease-editorial);
+}
+
+.cf-landing .cf-nav.scrolled {
+  background: var(--cf-black);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.cf-landing .cf-nav-inner {
+  width: 100%;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cf-landing .cf-nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--cf-white);
+}
+
+.cf-landing .cf-logo-mark {
+  width: 26px;
+  height: 26px;
+  background: var(--cf-blue);
+  position: relative;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.cf-landing .cf-logo-mark-inner {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 7px;
+  height: 7px;
+  background: var(--cf-white);
+  border-radius: 2px;
+}
+
+.cf-landing .cf-logo-text {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cf-white);
+}
+
+.cf-landing .cf-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.cf-landing .cf-nav-link {
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cf-white);
+  letter-spacing: 0.02em;
+  transition: color 0.15s var(--ease-editorial);
+}
+
+.cf-landing .cf-nav-link:hover {
+  color: var(--cf-blue);
+}
+
+.cf-landing .cf-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.cf-landing .cf-btn-ghost {
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--cf-white);
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+  transition: background 0.15s var(--ease-editorial), color 0.15s var(--ease-editorial), border-color 0.15s var(--ease-editorial);
+}
+
+.cf-landing .cf-btn-ghost:hover {
+  background: var(--cf-white);
+  border-color: var(--cf-white);
+  color: var(--cf-black);
+}
+
+.cf-landing .cf-btn-primary {
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--cf-white);
+  background: var(--cf-blue);
+  padding: 9px 18px;
+  border: none;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 14px rgba(0, 0, 255, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s var(--ease-editorial), transform 0.15s var(--ease-editorial), box-shadow 0.15s var(--ease-editorial), color 0.15s var(--ease-editorial);
+}
+
+.cf-landing .cf-btn-primary:hover {
+  background: var(--cf-white);
+  color: var(--cf-black);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.25);
+}
+
+.cf-landing .cf-btn-arrow {
+  display: inline-block;
+  transition: transform 0.2s var(--ease-editorial);
+}
+
+.cf-landing .cf-btn-primary:hover .cf-btn-arrow,
+.cf-landing .cf-btn-hero:hover .cf-btn-arrow,
+.cf-landing .cf-btn-cta:hover .cf-btn-arrow {
+  transform: translateX(4px);
+}
+
+.cf-landing .cf-nav-mobile-btn {
+  display: none;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  padding: 8px;
+  flex-direction: column;
+  gap: 5px;
+  border-radius: 4px;
+}
+
+.cf-landing .cf-nav-mobile-btn span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--cf-white);
+}
+
+.cf-landing .cf-mobile-drawer {
+  position: fixed;
+  top: var(--nav-height);
+  left: 0;
+  right: 0;
+  background: var(--cf-black);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 1.5rem var(--gutter) 2rem;
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cf-landing .cf-mobile-link {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cf-white);
+}
+
+.cf-landing .cf-mobile-link:hover {
+  color: var(--cf-blue);
+}
+
+.cf-landing .cf-mobile-hr {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0.5rem 0;
+}
+
+.cf-landing .cf-mobile-cta {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--cf-blue);
+  color: var(--cf-white);
+  font-family: var(--font-display);
+  font-weight: 700;
+  padding: 12px 18px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+/* Hero Section (Approved & Frozen) */
+.cf-landing .cf-hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--cf-black);
+  padding-top: var(--nav-height);
+  padding-bottom: 2.75rem;
+}
+
+.cf-landing .cf-hero-bg-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.cf-landing .cf-hero-bg-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 74% center;
+  display: block;
+}
+
+.cf-landing .cf-hero-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+      #000000 0%,
+      #000000 32%,
+      rgba(0, 0, 0, 0.72) 60%,
+      rgba(0, 0, 0, 0.15) 86%,
+      rgba(0, 0, 0, 0) 100%);
+}
+
+.cf-landing .cf-hero-content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.cf-landing .cf-hero-text-wrap {
+  max-width: 780px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.cf-landing .cf-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+}
+
+.cf-landing .cf-hero-eyebrow-pill {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cf-white);
+  background: var(--cf-black);
+  border: 1px solid rgba(0, 0, 255, 0.7);
+  padding: 5px 12px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 255, 0.15);
+}
+
+.cf-landing .cf-pill-pulse {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cf-blue);
+}
+
+.cf-landing .cf-hero-eyebrow-tag {
+  font-family: var(--font-main);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cf-blue);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cf-landing .cf-hero-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.35rem, 4.3vw, 3.85rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  color: var(--cf-white);
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cf-landing .cf-h1-statement {
+  display: block;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+}
+
+.cf-landing .cf-h1-punchline {
+  display: block;
+  white-space: nowrap;
+}
+
+.cf-landing .cf-h1-line-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.06em;
+}
+
+.cf-landing .cf-h1-line {
+  display: block;
+}
+
+.cf-landing .cf-hero-em {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--cf-white);
+  letter-spacing: -0.03em;
+}
+
+.cf-landing .cf-hero-sub {
+  font-family: var(--font-main);
+  font-size: clamp(1rem, 1.15vw, 1.125rem);
+  line-height: 1.55;
+  color: var(--cf-white);
+  max-width: 580px;
+  margin-bottom: 1.85rem;
+  font-weight: 400;
+}
+
+.cf-landing .cf-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 2.25rem;
+  flex-wrap: wrap;
+}
+
+.cf-landing .cf-btn-hero {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--cf-white);
+  background: var(--cf-blue);
+  border: none;
+  padding: 14px 28px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.02em;
+  box-shadow: var(--shadow-blue-cta);
+  transition: transform 0.2s var(--ease-editorial), box-shadow 0.2s var(--ease-editorial), background 0.2s var(--ease-editorial), color 0.2s var(--ease-editorial);
+}
+
+.cf-landing .cf-btn-hero:hover {
+  background: var(--cf-white);
+  color: var(--cf-black);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 0, 255, 0.35);
+}
+
+.cf-landing .cf-btn-hero-outline {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--cf-white);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 13px 24px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.2s var(--ease-editorial), color 0.2s var(--ease-editorial), border-color 0.2s var(--ease-editorial), transform 0.2s var(--ease-editorial);
+}
+
+.cf-landing .cf-btn-hero-outline:hover {
+  background: var(--cf-white);
+  border-color: var(--cf-white);
+  color: var(--cf-black);
+  transform: translateY(-2px);
+}
+
+.cf-landing .cf-hero-pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(1rem, 2vw, 2rem);
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  width: 100%;
+  max-width: 620px;
+}
+
+.cf-landing .cf-hero-pillar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cf-landing .cf-pillar-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--cf-blue);
+  letter-spacing: -0.01em;
+}
+
+.cf-landing .cf-pillar-desc {
+  font-family: var(--font-main);
+  font-size: 12px;
+  color: var(--cf-white);
+  line-height: 1.4;
+}
+
+/* ── 2. TICKER SECTION (Solid Black, White Text, Blue Indicators) ─────────── */
+.cf-landing .cf-ticker {
+  background: var(--cf-black);
+  color: var(--cf-white);
+  overflow: hidden;
+  padding: 16px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  user-select: none;
+}
+
+.cf-landing .cf-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: cf-ticker-scroll 34s linear infinite;
+}
+
+.cf-landing .cf-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 28px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cf-white);
+}
+
+.cf-landing .cf-ticker-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--cf-blue);
+  border-radius: 1px;
+}
+
+@keyframes cf-ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   3. PROBLEM / MANIFESTO (EDITORIAL TYPOGRAPHY, SOFT ELEVATION, NO OUTLINES)
+   ═════════════════════════════════════════════════════════════════════════════ */
+.cf-landing .cf-problem {
+  background: var(--cf-white);
+  color: var(--cf-black);
+  padding: clamp(5.5rem, 8.5vw, 9rem) 0;
+  position: relative;
+}
+
+.cf-landing .cf-problem-inner {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(2.5rem, 5.5vw, 6rem);
+  align-items: flex-start;
+}
+
+.cf-landing .cf-problem-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.cf-landing .cf-problem .cf-label {
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cf-blue);
+  margin-bottom: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cf-landing .cf-problem .cf-label::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--cf-blue);
+}
+
+.cf-landing .cf-problem-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 4.2vw, 3.75rem);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.04em;
+  color: var(--cf-black);
+  margin-bottom: 1.75rem;
+}
+
+.cf-landing .cf-problem-h2 em {
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.cf-landing .cf-problem-desc {
+  font-family: var(--font-main);
+  font-size: clamp(1.05rem, 1.2vw, 1.15rem);
+  line-height: 1.65;
+  color: var(--cf-black);
+  max-width: 520px;
+  margin-bottom: 3rem;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+/* CareerFlow Principle: Intentional Architectural Feature rather than boxed quote */
+.cf-landing .cf-manifesto-card {
+  position: relative;
+  padding: 2.25rem 2.5rem;
+  background: var(--cf-black);
+  color: var(--cf-white);
+  border: none;
+  border-left: 4px solid var(--cf-blue);
+  border-radius: 6px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 540px;
+}
+
+.cf-landing .cf-manifesto-badge {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cf-blue);
+}
+
+.cf-landing .cf-manifesto-quote {
+  font-family: var(--font-display);
+  font-size: 1.18rem;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--cf-white);
+  margin: 0;
+}
+
+.cf-landing .cf-problem-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Pain Cards: Borderless with subtle layered elevation */
+.cf-landing .cf-pain-card {
+  background: var(--cf-white);
+  border: none;
+  border-radius: 8px;
+  padding: 2.25rem 2.5rem;
+  box-shadow: var(--shadow-resting);
+  transition: transform 0.24s var(--ease-editorial), box-shadow 0.24s var(--ease-editorial);
+}
+
+.cf-landing .cf-pain-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.cf-landing .cf-pain-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.cf-landing .cf-pain-num {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--cf-black);
+}
+
+.cf-landing .cf-pain-badge {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 8px 10px;
+  border-radius: 2px;
+  background: var(--cf-blue);
+  color: var(--cf-white);
+}
+
+.cf-landing .cf-pain-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--cf-black);
+  margin-bottom: 0.6rem;
+  letter-spacing: -0.025em;
+}
+
+.cf-landing .cf-pain-body {
+  font-family: var(--font-main);
+  font-size: 0.96rem;
+  line-height: 1.62;
+  color: var(--cf-black);
+  opacity: 0.85;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   4. SOLUTION / GENUINE FEATURES (RECOMPOSED ARCHITECTURAL HIERARCHY)
+   ═════════════════════════════════════════════════════════════════════════════ */
+.cf-landing .cf-solution {
+  background: var(--cf-black);
+  color: var(--cf-white);
+  padding: clamp(6rem, 9vw, 9rem) 0;
+}
+
+.cf-landing .cf-solution .cf-label {
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cf-blue);
+  margin-bottom: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cf-landing .cf-solution .cf-label::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--cf-blue);
+}
+
+.cf-landing .cf-solution-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: flex-end;
+  margin-bottom: 3.75rem;
+}
+
+.cf-landing .cf-solution-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2.35rem, 4.3vw, 3.75rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  color: var(--cf-white);
+}
+
+.cf-landing .cf-solution-right-text {
+  font-family: var(--font-main);
+  font-size: clamp(1.05rem, 1.25vw, 1.18rem);
+  line-height: 1.62;
+  color: var(--cf-white);
+  opacity: 0.9;
+}
+
+.cf-landing .cf-features-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Primary Feature Spotlight: Dominant Scale & Rich Deep Elevation */
+.cf-landing .cf-feature-spotlight {
+  background: var(--cf-black);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: clamp(2.5rem, 4vw, 3.5rem);
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.7);
+  position: relative;
+  overflow: hidden;
+}
+
+.cf-landing .cf-spotlight-tag {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cf-white);
+  background: var(--cf-blue);
+  padding: 8px 12px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 255, 0.3);
+}
+
+.cf-landing .cf-spotlight-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.5vw, 2.1rem);
+  font-weight: 800;
+  color: var(--cf-white);
+  letter-spacing: -0.03em;
+  margin-bottom: 0.9rem;
+}
+
+.cf-landing .cf-spotlight-desc {
+  font-family: var(--font-main);
+  font-size: 1.05rem;
+  line-height: 1.68;
+  color: var(--cf-white);
+  max-width: 820px;
+  margin-bottom: 2.25rem;
+  opacity: 0.9;
+}
+
+.cf-landing .cf-spotlight-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cf-landing .cf-status-pill {
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 7px 16px;
+  border-radius: 2px;
+  letter-spacing: 0.02em;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cf-landing .cf-status-pill:hover {
+  transform: translateY(-2px);
+}
+
+.cf-landing .cf-pill-applied {
+  background: var(--cf-white);
+  color: var(--cf-black);
+}
+
+.cf-landing .cf-pill-interview {
+  background: var(--cf-blue);
+  color: var(--cf-white);
+  box-shadow: 0 2px 8px rgba(0, 0, 255, 0.3);
+}
+
+.cf-landing .cf-pill-tech {
+  background: var(--cf-white);
+  color: var(--cf-black);
+}
+
+.cf-landing .cf-pill-hr {
+  background: var(--cf-white);
+  color: var(--cf-black);
+}
+
+.cf-landing .cf-pill-offer {
+  background: var(--cf-blue);
+  color: var(--cf-white);
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(0, 0, 255, 0.3);
+}
+
+/* 3 Supporting Capabilities: Sleek, borderless cards with quiet elevation */
+.cf-landing .cf-features-subgrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+}
+
+.cf-landing .cf-subfeature-card {
+  background: var(--cf-black);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 2.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+  transition: transform 0.22s var(--ease-editorial), border-color 0.22s var(--ease-editorial), box-shadow 0.22s var(--ease-editorial);
+}
+
+.cf-landing .cf-subfeature-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 0, 255, 0.5);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--cf-blue);
+}
+
+.cf-landing .cf-subfeature-icon {
+  font-size: 26px;
+  margin-bottom: 1.25rem;
+  color: var(--cf-blue);
+}
+
+.cf-landing .cf-subfeature-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--cf-white);
+  letter-spacing: -0.015em;
+  margin-bottom: 0.65rem;
+}
+
+.cf-landing .cf-subfeature-body {
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  line-height: 1.62;
+  color: var(--cf-white);
+  opacity: 0.85;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   5. PRODUCT SHOWCASE: ELEVATED WORKSPACE (REMOVED WIREFRAME BORDERS)
+   ═════════════════════════════════════════════════════════════════════════════ */
+.cf-landing .cf-showcase {
+  background: var(--cf-white);
+  color: var(--cf-black);
+  padding: clamp(5rem, 8vw, 7.5rem) 0 clamp(6rem, 9vw, 8.5rem);
+}
+
+.cf-landing .cf-showcase .cf-label {
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cf-blue);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.cf-landing .cf-showcase-header {
+  margin-bottom: 3rem;
+}
+
+.cf-landing .cf-showcase-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2.3rem, 4vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--cf-black);
+  margin-bottom: 0.5rem;
+}
+
+.cf-landing .cf-showcase-sub {
+  font-family: var(--font-main);
+  font-size: 1.05rem;
+  color: var(--cf-black);
+  max-width: 600px;
+  opacity: 0.85;
+}
+
+/* Product Window: Clean elevated elevation, no harsh 2px outline */
+.cf-landing .cf-product-window {
+  background: var(--cf-white);
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.14), 0 4px 16px rgba(0, 0, 0, 0.05);
+  transform: perspective(1400px) rotateX(1deg);
+  transition: transform 0.35s var(--ease-editorial), box-shadow 0.35s var(--ease-editorial);
+}
+
+.cf-landing .cf-product-window:hover {
+  transform: perspective(1400px) rotateX(0deg) translateY(-2px);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.18), 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+.cf-landing .cf-window-bar {
+  background: var(--cf-black);
+  border-bottom: none;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cf-landing .cf-window-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.cf-landing .cf-window-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.cf-landing .cf-window-dot:first-child {
+  background: var(--cf-blue);
+}
+
+.cf-landing .cf-window-url {
+  font-family: var(--font-main);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--cf-white);
+  letter-spacing: 0.02em;
+}
+
+.cf-landing .cf-app-layout {
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  min-height: 480px;
+}
+
+.cf-landing .cf-app-sidebar {
+  background: var(--cf-black);
+  border-right: none;
+  padding: 1.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cf-landing .cf-sidebar-brand {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cf-white);
+  padding: 0 8px 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 0.5rem;
+}
+
+.cf-landing .cf-sidebar-item {
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
+  padding: 8px 10px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.cf-landing .cf-sidebar-item svg {
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.cf-landing .cf-sidebar-item.active {
+  background: var(--cf-blue);
+  color: var(--cf-white);
+  font-weight: 700;
+}
+
+.cf-landing .cf-sidebar-item.active svg {
+  opacity: 1;
+}
+
+.cf-landing .cf-app-main {
+  background: var(--cf-white);
+  padding: 2rem 2.25rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cf-landing .cf-app-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.cf-landing .cf-app-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--cf-black);
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.cf-landing .cf-app-subtitle {
+  display: block;
+  font-family: var(--font-main);
+  font-size: 12.5px;
+  color: var(--cf-black);
+  opacity: 0.65;
+  margin-top: 3px;
+}
+
+.cf-landing .cf-app-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cf-landing .cf-app-check-btn {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  color: var(--cf-black);
+  background: var(--cf-white);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.cf-landing .cf-app-check-btn:hover {
+  border-color: var(--cf-black);
+}
+
+.cf-landing .cf-app-btn-add {
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 700;
+  background: var(--cf-blue);
+  color: var(--cf-white);
+  padding: 7px 14px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 255, 0.22);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cf-landing .cf-app-btn-add:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 255, 0.3);
+}
+
+/* Kanban Board: Clean grouping, calm headers, and scannable cards */
+.cf-landing .cf-kanban {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+
+.cf-landing .cf-kanban-col {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cf-landing .cf-kanban-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.cf-landing .cf-kanban-col-name {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--cf-black);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cf-landing .cf-kanban-count {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--cf-black);
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 7px;
+  border-radius: 999px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.cf-landing .cf-kanban-col-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cf-landing .cf-kanban-card {
+  background: var(--cf-white);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  padding: 13px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s var(--ease-editorial), box-shadow 0.2s var(--ease-editorial), border-color 0.2s ease;
+}
+
+.cf-landing .cf-kanban-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.cf-landing .cf-kcard-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cf-landing .cf-kcard-company {
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--cf-black);
+  letter-spacing: -0.01em;
+}
+
+.cf-landing .cf-kcard-source {
+  font-family: var(--font-main);
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.cf-landing .cf-kcard-role {
+  font-family: var(--font-main);
+  font-size: 12.5px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.85);
+  line-height: 1.35;
+}
+
+.cf-landing .cf-kcard-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding-top: 7px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  gap: 8px;
+}
+
+.cf-landing .cf-kcard-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-main);
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.cf-landing .cf-kcard-note {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--cf-blue);
+  letter-spacing: 0.02em;
+}
+
+.cf-landing .cf-kcard-offer-badge {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--cf-blue);
+  color: var(--cf-white);
+  padding: 6px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+  text-wrap: nowrap;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   6. WORKFLOW PRINCIPLES (EDITORIAL TYPOGRAPHIC COMPOSITION)
+   ═════════════════════════════════════════════════════════════════════════════ */
+.cf-landing .cf-metrics {
+  background: var(--cf-white);
+  color: var(--cf-black);
+  padding: clamp(4rem, 7vw, 7rem) 0 clamp(5rem, 8vw, 8rem);
+}
+
+.cf-landing .cf-metrics-header {
+  margin-bottom: 2.75rem;
+}
+
+.cf-landing .cf-metrics .cf-label {
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cf-blue);
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.cf-landing .cf-metrics-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 3.8vw, 3.25rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--cf-black);
+}
+
+.cf-landing .cf-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(1.5rem, 3vw, 3rem);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 3.5rem;
+}
+
+.cf-landing .cf-metric-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+.cf-landing .cf-metric-val {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 4.5vw, 4.2rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--cf-blue);
+  line-height: 0.95;
+}
+
+.cf-landing .cf-metric-label {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--cf-black);
+  letter-spacing: -0.015em;
+}
+
+.cf-landing .cf-metric-desc {
+  font-family: var(--font-main);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--cf-black);
+  opacity: 0.8;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   7. FINAL CTA (CONFIDENT EDITORIAL CONCLUSION, SOLID BLACK)
+   ═════════════════════════════════════════════════════════════════════════════ */
+.cf-landing .cf-cta {
+  background: var(--cf-black);
+  color: var(--cf-white);
+  padding: clamp(6.5rem, 9.5vw, 9.5rem) 0;
+  text-align: center;
+}
+
+.cf-landing .cf-cta-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.cf-landing .cf-cta .cf-label {
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cf-blue);
+  margin-bottom: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cf-landing .cf-cta .cf-label::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--cf-blue);
+}
+
+.cf-landing .cf-cta-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 5.2vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  color: var(--cf-white);
+  margin-bottom: 1.5rem;
+}
+
+.cf-landing .cf-cta-h2 em {
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.cf-landing .cf-cta-sub {
+  font-family: var(--font-main);
+  font-size: clamp(1.05rem, 1.3vw, 1.22rem);
+  line-height: 1.65;
+  color: var(--cf-white);
+  max-width: 560px;
+  margin-bottom: 2.75rem;
+  opacity: 0.9;
+}
+
+.cf-landing .cf-btn-cta {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cf-white);
+  background: var(--cf-blue);
+  border: none;
+  padding: 16px 36px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.02em;
+  box-shadow: var(--shadow-blue-cta);
+  transition: transform 0.2s var(--ease-editorial), box-shadow 0.2s var(--ease-editorial), background 0.2s var(--ease-editorial), color 0.2s var(--ease-editorial);
+}
+
+.cf-landing .cf-btn-cta:hover {
+  background: var(--cf-white);
+  color: var(--cf-black);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(0, 0, 255, 0.35);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   8. FOOTER (PURE WHITE CANVAS, BLACK TEXT, SELECTIVE BLUE LINKS)
+   ═════════════════════════════════════════════════════════════════════════════ */
+.cf-landing .cf-footer {
+  background: var(--cf-white);
+  color: var(--cf-black);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 5rem 0 3.5rem;
+}
+
+.cf-landing .cf-footer-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 3.5rem;
+  padding-bottom: 3.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.cf-landing .cf-footer-brand {
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cf-landing .cf-footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cf-landing .cf-footer-logo-mark {
+  width: 22px;
+  height: 22px;
+  background: var(--cf-blue);
+  border-radius: 4px;
+  position: relative;
+}
+
+.cf-landing .cf-footer-logo-mark::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 6px;
+  height: 6px;
+  background: var(--cf-white);
+  border-radius: 2px;
+}
+
+.cf-landing .cf-footer-logo-text {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cf-black);
+}
+
+.cf-landing .cf-footer-desc {
+  font-family: var(--font-main);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--cf-black);
+  opacity: 0.75;
+}
+
+.cf-landing .cf-footer-nav {
+  display: flex;
+  gap: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+.cf-landing .cf-footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cf-landing .cf-footer-col-title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cf-blue);
+  margin-bottom: 6px;
+}
+
+.cf-landing .cf-footer-link {
+  font-family: var(--font-main);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--cf-black);
+  transition: color 0.15s var(--ease-editorial);
+}
+
+.cf-landing .cf-footer-link:hover {
+  color: var(--cf-blue);
+}
+
+.cf-landing .cf-footer-bottom {
+  padding-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-main);
+  font-size: 12.5px;
+  color: var(--cf-black);
+  opacity: 0.65;
+}
+
+/* ── SCROLL REVEAL ANIMATIONS ─────────────────────────────────────────────── */
+.cf-landing .cf-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.65s var(--ease-editorial), transform 0.65s var(--ease-editorial);
+  will-change: opacity, transform;
+}
+
+.cf-landing .cf-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cf-landing .cf-reveal-right {
+  transform: translateX(20px);
+}
+
+.cf-landing .cf-reveal-right.visible {
+  transform: translateX(0);
+}
+
+.cf-landing .cf-reveal-delay-1 {
+  transition-delay: 0.08s;
+}
+
+.cf-landing .cf-reveal-delay-2 {
+  transition-delay: 0.16s;
+}
+
+.cf-landing .cf-reveal-delay-3 {
+  transition-delay: 0.24s;
+}
+
+/* ── RESPONSIVE ADAPTATIONS (TABLET & MOBILE) ─────────────────────────────── */
+@media (max-width: 991px) {
+  .cf-landing .cf-hero {
+    min-height: 100vh;
+    min-height: 100svh;
+    padding-top: var(--nav-height);
+    padding-bottom: 3.5rem;
+  }
+
+  .cf-landing .cf-hero-content {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .cf-landing .cf-hero-bg-media {
+    object-position: center center;
+  }
+
+  .cf-landing .cf-hero-overlay {
+    background: linear-gradient(180deg,
+        #000000 0%,
+        #000000 55%,
+        rgba(0, 0, 0, 0.75) 85%,
+        rgba(0, 0, 0, 0.3) 100%);
+  }
+
+  .cf-landing .cf-h1-statement,
+  .cf-landing .cf-h1-punchline {
+    white-space: normal;
+  }
+
+  .cf-landing .cf-problem-inner {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .cf-landing .cf-solution-header {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .cf-landing .cf-features-subgrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cf-landing .cf-app-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cf-landing .cf-app-sidebar {
+    display: none;
+  }
+
+  .cf-landing .cf-kanban {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cf-landing .cf-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem 1.5rem;
+  }
+
+  .cf-landing .cf-footer-top {
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .cf-landing .cf-nav-links,
+  .cf-landing .cf-nav-actions {
+    display: none;
+  }
+
+  .cf-landing .cf-nav-mobile-btn {
+    display: flex;
+  }
+
+  .cf-landing .cf-hero {
+    min-height: 100vh;
+    min-height: 100svh;
+    padding-top: var(--nav-height);
+    padding-bottom: 3rem;
+  }
+
+  .cf-landing .cf-hero-content {
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+  }
+
+  .cf-landing .cf-hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .cf-landing .cf-btn-hero,
+  .cf-landing .cf-btn-hero-outline {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cf-landing .cf-hero-pillars {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .cf-landing .cf-kanban {
+    grid-template-columns: 1fr;
+  }
+
+  .cf-landing .cf-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .cf-landing .cf-footer-bottom {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .cf-landing .cf-hero-h1 {
+    font-size: 2.2rem;
+    line-height: 1.08;
+  }
+}
+
+@media (max-width: 340px) {
+  .cf-landing .cf-hero-h1 {
+    font-size: 1.85rem;
+    line-height: 1.1;
+    word-break: break-word;
+  }
+}
+
+/* ── REDUCED MOTION PREFERENCES ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+
+  .cf-landing *,
+  .cf-landing *::before,
+  .cf-landing *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .cf-landing .cf-ticker-track {
+    animation: none;
+  }
+
+  .cf-landing .cf-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .cf-landing .cf-btn-primary:hover,
+  .cf-landing .cf-btn-hero:hover,
+  .cf-landing .cf-btn-cta:hover,
+  .cf-landing .cf-pain-card:hover,
+  .cf-landing .cf-subfeature-card:hover,
+  .cf-landing .cf-kanban-card:hover,
+  .cf-landing .cf-product-window:hover {
+    transform: none !important;
+  }
+}

@@ -1,0 +1,723 @@
+/* =============================================================================
+   CAREERFLOW — DASHBOARD OVERVIEW PAGE
+   Strict Palette: Pure Black (#000000), Pure White (#FFFFFF), Pure Blue (#0000FF)
+   Display Typography: Sora
+   UI / Body: DM Sans
+   ============================================================================= */
+
+.cf-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+  background-color: var(--color-white);
+  color: var(--color-black);
+}
+
+/* ── Page Header ── */
+.cf-dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.cf-dashboard-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cf-dashboard-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.5vw, 2.15rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--color-black);
+  margin: 0;
+}
+
+.cf-dashboard-desc {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.65);
+  margin: 0;
+  max-width: 600px;
+}
+
+.cf-dashboard-header-actions {
+  flex-shrink: 0;
+}
+
+/* ── Primary Action Button ── */
+.cf-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  background-color: var(--color-blue);
+  color: #FFFFFF;
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 255, 0.22);
+  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+
+.cf-btn-primary:hover {
+  opacity: 0.94;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 255, 0.3);
+}
+
+.cf-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: var(--color-black);
+  color: #FFFFFF;
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.cf-btn-secondary:hover {
+  opacity: 0.88;
+}
+
+/* ── Error Banner ── */
+.cf-dashboard-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 12px 16px;
+  border-radius: 4px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-blue);
+  box-shadow: 0 4px 12px rgba(0, 0, 255, 0.08);
+}
+
+.cf-error-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-black);
+}
+
+.cf-error-text svg {
+  color: var(--color-blue);
+  flex-shrink: 0;
+}
+
+.cf-error-retry-btn {
+  background: var(--color-blue);
+  border: 1px solid var(--color-blue);
+  color: #FFFFFF;
+  padding: 5px 12px;
+  border-radius: 3px;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.cf-error-retry-btn:hover {
+  opacity: 0.9;
+}
+
+/* ── Key Metrics Strip (Refined, Subtle Elevation) ── */
+.cf-metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+
+.cf-metric-card {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px;
+  background-color: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cf-metric-card:hover {
+  border-color: rgba(0, 0, 0, 0.14);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
+}
+
+.cf-metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cf-metric-label {
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.cf-metric-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-blue);
+}
+
+.cf-metric-body {
+  margin: 10px 0 4px;
+  min-height: 2.2rem;
+  display: flex;
+  align-items: baseline;
+}
+
+.cf-metric-value {
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--color-black);
+  line-height: 1;
+}
+
+.cf-metric-value.highlight {
+  color: var(--color-blue);
+}
+
+.cf-metric-sub {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+/* ── Section Structure ── */
+.cf-dashboard-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cf-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 2px;
+}
+
+.cf-header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cf-section-heading {
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--color-black);
+  margin: 0;
+}
+
+.cf-heading-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  background-color: rgba(0, 0, 0, 0.07);
+  color: var(--color-black);
+}
+
+.cf-heading-badge.alert {
+  background-color: var(--color-blue);
+  color: #FFFFFF;
+}
+
+.cf-section-meta {
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.cf-section-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-black);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.cf-section-link:hover {
+  color: var(--color-blue);
+}
+
+/* ── Pipeline Summary Card ── */
+.cf-pipeline-card {
+  padding: 20px 22px;
+  background-color: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.cf-pipeline-empty {
+  padding: 18px 20px;
+}
+
+.cf-pipeline-empty-text {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.55);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.cf-pipeline-bar {
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.cf-pipeline-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.cf-pipeline-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 14px;
+}
+
+.cf-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.cf-legend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.cf-legend-label {
+  font-weight: 500;
+}
+
+.cf-legend-count {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--color-black);
+}
+
+/* ── Two-Column Operational Grid ── */
+.cf-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.cf-grid-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Recent Applications Table Container ── */
+.cf-recent-container,
+.cf-interviews-container {
+  background-color: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.cf-recent-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.cf-table-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 18px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.cf-table-row:last-child {
+  border-bottom: none;
+}
+
+.cf-table-row:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.cf-row-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cf-company-avatar {
+  width: 28px;
+  height: 28px;
+  background-color: var(--color-black);
+  color: #FFFFFF;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.cf-row-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.cf-row-company {
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-black);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cf-row-role {
+  font-family: var(--font-sans);
+  font-size: 0.78125rem;
+  color: rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cf-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.cf-row-date {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+}
+
+/* ── Status Pills (Strict Pure Palette) ── */
+.cf-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cf-status-pill.badge-blue {
+  background-color: var(--color-blue);
+  color: #FFFFFF;
+}
+
+.cf-status-pill.badge-black {
+  background-color: var(--color-black);
+  color: #FFFFFF;
+}
+
+.cf-status-pill.badge-neutral {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: var(--color-black);
+}
+
+.cf-status-pill.badge-quiet {
+  background-color: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  color: rgba(0, 0, 0, 0.65);
+}
+
+/* ── Upcoming Interviews Stack ── */
+.cf-interviews-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+}
+
+.cf-interview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  background-color: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-left: 3px solid var(--color-blue);
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cf-interview-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+}
+
+.cf-interview-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cf-interview-company-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cf-interview-company {
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-black);
+}
+
+.cf-interview-role {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.cf-interview-pill {
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  background-color: var(--color-blue);
+  color: #FFFFFF;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.cf-interview-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-black);
+  padding-top: 6px;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* ── Empty States ── */
+.cf-empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.75rem 1.5rem;
+  gap: 10px;
+}
+
+.cf-empty-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.04);
+  color: var(--color-black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.cf-empty-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-black);
+  margin: 0;
+}
+
+.cf-empty-desc {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.55);
+  margin: 0;
+  max-width: 320px;
+}
+
+.cf-empty-box .cf-btn-secondary {
+  margin-top: 6px;
+}
+
+/* ── Skeleton Loading ── */
+.cf-skeleton {
+  background-color: rgba(0, 0, 0, 0.06);
+  animation: cf-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes cf-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.cf-loading-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+}
+
+.skeleton-row {
+  cursor: default;
+}
+
+.skeleton-card {
+  cursor: default;
+}
+
+/* ── Responsive Layout Overrides ── */
+@media (max-width: 1200px) {
+  .cf-metrics-strip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .cf-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .cf-dashboard {
+    gap: 1.75rem;
+  }
+
+  .cf-dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cf-metrics-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cf-table-row {
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cf-metrics-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .cf-table-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .cf-row-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .cf-btn-primary,
+  .cf-metric-card,
+  .cf-interview-card,
+  .cf-table-row {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .cf-skeleton {
+    animation: none !important;
+  }
+}

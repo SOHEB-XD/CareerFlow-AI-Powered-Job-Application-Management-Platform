@@ -1,0 +1,322 @@
+/* =============================================================================
+   CAREERFLOW — DASHBOARD LAYOUT & APPLICATION SHELL
+   Strict Palette: Pure Black (#000000), Pure White (#FFFFFF), Pure Blue (#0000FF)
+   Display Typography: Sora
+   UI / Body: DM Sans
+   ============================================================================= */
+
+/* Core Layout Shell */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: var(--color-white);
+  color: var(--color-black);
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background-color: var(--color-white);
+}
+
+/* Sidebar (Solid Black Architectural Rail) */
+.app-sidebar {
+  width: 250px;
+  background-color: var(--color-black);
+  color: var(--color-white);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  z-index: 40;
+  transform: translateZ(0);
+  transition: transform 0.25s var(--ease-editorial);
+}
+
+.sidebar-header {
+  height: 60px;
+  padding: 0 var(--space-4);
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--color-white);
+  transition: opacity 0.15s ease;
+}
+
+.brand-logo:hover {
+  opacity: 0.9;
+}
+
+.brand-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background-color: var(--color-blue);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.brand-icon::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-white);
+  border-radius: 1px;
+}
+
+.brand-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--color-white);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Navigation List */
+.sidebar-nav {
+  flex: 1;
+  padding: var(--space-4) var(--space-3);
+  overflow-y: auto;
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+}
+
+.nav-link.active {
+  background-color: var(--color-blue);
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.nav-icon {
+  flex-shrink: 0;
+}
+
+/* Sidebar Footer (User Area) */
+.sidebar-footer {
+  padding: var(--space-4) var(--space-3);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: var(--color-black);
+}
+
+.user-area {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background-color: var(--color-black);
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-right: var(--space-2);
+}
+
+.user-name {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-email {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logout-button {
+  background: var(--color-black);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-white);
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logout-button:hover {
+  background-color: var(--color-blue);
+  border-color: var(--color-blue);
+  color: var(--color-white);
+}
+
+/* Top Navigation (Subtle White Bar with Hairline Separation) */
+.app-topnav {
+  height: 60px;
+  background-color: var(--color-white);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-6);
+  flex-shrink: 0;
+  z-index: 30;
+  position: sticky;
+  top: 0;
+}
+
+.topnav-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.topnav-context {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topnav-brand-crumb {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.topnav-crumb-sep {
+  color: rgba(0, 0, 0, 0.25);
+  font-size: 0.8rem;
+}
+
+.topnav-active-crumb {
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-black);
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: var(--color-white);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  color: var(--color-black);
+  padding: 6px 10px;
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+/* Main Content Area */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-6);
+  background-color: var(--color-white);
+}
+
+.content-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Responsive Overrides */
+@media (max-width: 1024px) {
+  .mobile-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transform: translateX(-100%);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  }
+  
+  .app-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  
+  .app-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 35;
+  }
+  
+  .app-content {
+    padding: var(--space-4);
+  }
+
+  .topnav-brand-crumb, .topnav-crumb-sep {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-topnav {
+    padding: 0 var(--space-4);
+  }
+}

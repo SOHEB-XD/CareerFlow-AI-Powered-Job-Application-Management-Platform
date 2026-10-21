@@ -12,9 +12,7 @@ const getDraftFollowUpEmails = async (req, res) => {
             appliedDate: 1
         }).populate("application", "companyName role appliedDate status");
 
-        if (communications.length === 0) {
-            return res.status(404).json({ success: false, message: 'No draft emails found' });
-        }
+
 
         res.status(200).json({
             success: true,
@@ -38,9 +36,7 @@ const getDraftApplicationEmails = async (req, res) => {
             appliedDate: 1
         }).populate("application", "companyName role appliedDate status");
 
-        if (communications.length === 0) {
-            return res.status(404).json({ success: false, message: 'No draft emails found' });
-        }
+
 
         res.status(200).json({
             success: true,

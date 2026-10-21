@@ -1,0 +1,48 @@
+/* =============================================================================
+   CAREERFLOW — UI BADGE COMPONENT
+   STRICT DESIGN SYSTEM: PURE BLACK (#000000), PURE WHITE (#FFFFFF), PURE BLUE (#0000FF)
+   ============================================================================= */
+
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.625rem;
+  border-radius: 20px;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.ui-badge-neutral {
+  background-color: #FFFFFF;
+  color: #000000;
+  border: 1px solid #000000;
+}
+
+.ui-badge-accent {
+  background-color: #0000FF;
+  color: #FFFFFF;
+  border: 1px solid #0000FF;
+}
+
+.ui-badge-success {
+  background-color: #FFFFFF;
+  color: #0000FF;
+  border: 1px solid #0000FF;
+}
+
+.ui-badge-warning {
+  background-color: #FFFFFF;
+  color: #000000;
+  border: 1px solid #000000;
+}
+
+.ui-badge-destructive {
+  background-color: #000000;
+  color: #FFFFFF;
+  border: 1px solid #000000;
+}

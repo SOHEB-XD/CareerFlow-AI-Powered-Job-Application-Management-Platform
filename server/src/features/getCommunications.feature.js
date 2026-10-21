@@ -29,13 +29,6 @@ const getCommunications = async (req, res) => {
             data: communications
         };
 
-        if (paginatedData.total === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Communications not found"
-            });
-        }
-
         res.status(200).json({
             success: true,
             message: "Communications fetched successfully",
