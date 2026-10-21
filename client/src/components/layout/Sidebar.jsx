@@ -1,4 +1,4 @@
-import { NavLink, Link, useLocation } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { 
   LayoutDashboard, 
@@ -12,15 +12,14 @@ import { useAuth } from '../../context/AuthContext';
 import './Layout.css';
 
 const NAV_ITEMS = [
-  { path: '/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { path: '/dashboard/applications', label: 'Applications', icon: Briefcase },
-  { path: '/dashboard/resume', label: 'Resume', icon: FileText },
-  { path: '/dashboard/communications', label: 'Communications', icon: MessageSquare },
+  { path: '/dashboard', label: 'Overview', icon: LayoutDashboard, end: true },
+  { path: '/dashboard/applications', label: 'Applications', icon: Briefcase, end: false },
+  { path: '/dashboard/resume', label: 'Resume', icon: FileText, end: false },
+  { path: '/dashboard/communications', label: 'Communications', icon: MessageSquare, end: false },
 ];
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
-  const location = useLocation();
 
   // Desktop sidebar is persistent. Mobile uses framer-motion for smooth drawer entry.
   // We handle the visual toggle with CSS media queries where possible, but for the drawer
@@ -53,23 +52,19 @@ const Sidebar = ({ isOpen, onClose }) => {
 
         <nav className="sidebar-nav">
           <ul className="nav-list">
-            {NAV_ITEMS.map((item) => {
-              const isActive = location.pathname === item.path ||
-                               (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
-              
-              return (
-                <li key={item.path} className="nav-item">
-                  <NavLink 
-                    to={item.path} 
-                    className={`nav-link ${isActive ? 'active' : ''}`}
-                    onClick={onClose}
-                  >
-                    <item.icon size={18} strokeWidth={1.8} className="nav-icon" aria-hidden="true" />
-                    <span className="nav-label">{item.label}</span>
-                  </NavLink>
-                </li>
-              );
-            })}
+            {NAV_ITEMS.map((item) => (
+              <li key={item.path} className="nav-item">
+                <NavLink 
+                  to={item.path} 
+                  end={item.end}
+                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                  onClick={onClose}
+                >
+                  <item.icon size={18} strokeWidth={1.8} className="nav-icon" aria-hidden="true" />
+                  <span className="nav-label">{item.label}</span>
+                </NavLink>
+              </li>
+            ))}
           </ul>
         </nav>
 
@@ -78,7 +73,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             <li className="nav-item">
               <NavLink 
                 to="/dashboard/settings" 
-                className={`nav-link ${location.pathname === '/dashboard/settings' ? 'active' : ''}`} 
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} 
                 onClick={onClose}
               >
                 <Settings size={18} strokeWidth={1.8} className="nav-icon" aria-hidden="true" />

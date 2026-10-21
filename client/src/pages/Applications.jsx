@@ -11,7 +11,10 @@ import {
   ChevronRight, 
   AlertCircle, 
   CheckCircle2, 
-  Clock
+  Clock,
+  CalendarDays,
+  ChevronDown,
+  Loader2
 } from 'lucide-react';
 import { 
   getApplications, 
@@ -46,17 +49,6 @@ const COMMON_SOURCES = [
   'Other'
 ];
 
-const STATUS_CONFIG = {
-  'Applied':            { label: 'Applied',           color: '#000000', bg: '#FFFFFF', border: '#000000', dot: '#0000FF' },
-  'Interview Scheduled':{ label: 'Interview',         color: '#FFFFFF', bg: '#0000FF', border: '#0000FF', dot: '#FFFFFF' },
-  'Technical Round':    { label: 'Technical Round',   color: '#FFFFFF', bg: '#0000FF', border: '#0000FF', dot: '#FFFFFF' },
-  'HR Round':           { label: 'HR Round',          color: '#FFFFFF', bg: '#0000FF', border: '#0000FF', dot: '#FFFFFF' },
-  'Offer Letter':       { label: 'Offer Letter',      color: '#FFFFFF', bg: '#000000', border: '#000000', dot: '#0000FF' },
-  'Rejected':           { label: 'Rejected',          color: '#000000', bg: '#FFFFFF', border: '#000000', dot: '#000000' },
-  'Withdrawn':          { label: 'Withdrawn',         color: '#000000', bg: '#FFFFFF', border: '#000000', dot: '#000000' },
-  'No Response':        { label: 'No Response',       color: '#000000', bg: '#FFFFFF', border: '#000000', dot: '#0000FF' }
-};
-
 // Date formatters
 const formatDate = (dateStr) => {
   if (!dateStr) return '—';
@@ -75,6 +67,7 @@ const formatInterviewDate = (dateStr) => {
   if (!dateStr) return '—';
   try {
     return new Date(dateStr).toLocaleDateString('en-US', { 
+      weekday: 'short', 
       month: 'short', 
       day: 'numeric', 
       hour: '2-digit', 
@@ -95,6 +88,21 @@ const toInputDate = (dateStr) => {
   }
 };
 
+// Canonical status presentation locked to #000000, #FFFFFF, #0000FF
+const getStatusBadgeClass = (status) => {
+  switch (status) {
+    case 'Interview Scheduled':
+    case 'Technical Round':
+    case 'HR Round':
+      return 'badge-blue';
+    case 'Offer Letter':
+      return 'badge-black';
+    case 'Applied':
+      return 'badge-neutral';
+    default:
+      return 'badge-quiet';
+  }
+};
 
 const Applications = () => {
   // Collection state
@@ -136,6 +144,11 @@ const Applications = () => {
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteApiError, setDeleteApiError] = useState('');
+
+  // Inline status update & prompt states
+  const [updatingStatusId, setUpdatingStatusId] = useState(null);
+  const [datePrompt, setDatePrompt] = useState(null);
+  const [datePromptError, setDatePromptError] = useState('');
 
   // Auto-dismiss toasts
   useEffect(() => {
@@ -201,6 +214,74 @@ const Applications = () => {
     setDebouncedSearch('');
     setStatusFilter('All');
     setPage(1);
+  };
+
+  // ── Handlers: Inline Status Change ──
+  const performStatusUpdate = async (app, newStatus, interviewDate) => {
+    setUpdatingStatusId(app._id);
+    try {
+      const payload = { status: newStatus };
+      if (interviewDate) {
+        payload.interviewDate = interviewDate;
+      }
+
+      const { data } = await updateApplication(app._id, payload);
+      if (data?.success && data?.data) {
+        setApplications((prev) =>
+          prev.map((item) => (item._id === app._id ? { ...item, ...data.data } : item))
+        );
+        setToast({
+          type: 'success',
+          text: `Updated status for ${app.companyName} to "${newStatus}"`
+        });
+        return true;
+      }
+      return false;
+    } catch (err) {
+      setToast({
+        type: 'error',
+        text: err.response?.data?.message || `Failed to update status for ${app.companyName}. Previous status preserved.`
+      });
+      return false;
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  };
+
+  const handleInlineStatusChange = async (app, newStatus) => {
+    if (app.status === newStatus || updatingStatusId === app._id) return;
+
+    // Requirement 8: If interview-related status requires interview date and has none, prompt user
+    const isInterview = INTERVIEW_STATUSES.includes(newStatus);
+    if (isInterview && !app.interviewDate) {
+      setDatePrompt({
+        app,
+        targetStatus: newStatus,
+        interviewDate: new Date().toISOString().split('T')[0]
+      });
+      setDatePromptError('');
+      return;
+    }
+
+    await performStatusUpdate(app, newStatus);
+  };
+
+  const handleDatePromptSubmit = async (e) => {
+    e.preventDefault();
+    if (!datePrompt.interviewDate) {
+      setDatePromptError('Please provide an interview date to proceed');
+      return;
+    }
+
+    const success = await performStatusUpdate(
+      datePrompt.app,
+      datePrompt.targetStatus,
+      datePrompt.interviewDate
+    );
+    if (success) {
+      setDatePrompt(null);
+      setDatePromptError('');
+    }
   };
 
   // ── Handlers: Check No Response (Silent Applications) ──
@@ -389,7 +470,7 @@ const Applications = () => {
             onClick={handleCheckNoResponse}
             title="Update applications older than 10 days to 'No Response'"
           >
-            <Clock size={16} aria-hidden="true" />
+            <Clock size={15} strokeWidth={2} aria-hidden="true" />
             <span>Check Inactive</span>
           </button>
           <button 
@@ -397,7 +478,7 @@ const Applications = () => {
             className="btn-primary" 
             onClick={handleOpenCreateModal}
           >
-            <Plus size={16} aria-hidden="true" />
+            <Plus size={15} strokeWidth={2.4} aria-hidden="true" />
             <span>Add Application</span>
           </button>
         </div>
@@ -410,9 +491,9 @@ const Applications = () => {
           role="status"
         >
           {toast.type === 'error' ? (
-            <AlertCircle size={16} aria-hidden="true" />
+            <AlertCircle size={16} strokeWidth={2} aria-hidden="true" />
           ) : (
-            <CheckCircle2 size={16} aria-hidden="true" />
+            <CheckCircle2 size={16} strokeWidth={2} aria-hidden="true" />
           )}
           <span>{toast.text}</span>
           <button 
@@ -429,7 +510,7 @@ const Applications = () => {
       {/* ── Top Level Error Banner with Retry ── */}
       {error && (
         <div className="app-alert app-alert-error" role="alert">
-          <AlertCircle size={16} aria-hidden="true" />
+          <AlertCircle size={16} strokeWidth={2} aria-hidden="true" />
           <span>{error}</span>
           <button 
             type="button" 
@@ -445,7 +526,7 @@ const Applications = () => {
       <section className="applications-controls" aria-label="Search and Filter Applications">
         <div className="controls-row-top">
           <div className="search-input-wrap">
-            <Search size={16} className="search-icon" aria-hidden="true" />
+            <Search size={15} strokeWidth={2} className="search-icon" aria-hidden="true" />
             <input
               type="text"
               className="search-input"
@@ -461,7 +542,7 @@ const Applications = () => {
                 onClick={() => setSearchQuery('')}
                 aria-label="Clear search input"
               >
-                <X size={14} />
+                <X size={14} strokeWidth={2} />
               </button>
             )}
           </div>
@@ -503,17 +584,9 @@ const Applications = () => {
       <section className="applications-table-card" aria-label="Applications List">
         {isLoading ? (
           /* Loading Skeleton */
-          <div style={{ padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="applications-skeleton-stack">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div 
-                key={i} 
-                style={{ 
-                  height: '42px', 
-                  borderRadius: 'var(--radius-md)', 
-                  background: 'var(--border-subtle)', 
-                  animation: 'pulse 1.2s infinite ease-in-out' 
-                }} 
-              />
+              <div key={i} className="applications-skeleton-row" />
             ))}
           </div>
         ) : applications.length === 0 ? (
@@ -521,9 +594,9 @@ const Applications = () => {
           <div className="applications-empty-state">
             <div className="empty-icon-wrap" aria-hidden="true">
               {debouncedSearch || statusFilter !== 'All' ? (
-                <Search size={24} />
+                <Search size={22} strokeWidth={1.8} />
               ) : (
-                <Briefcase size={24} />
+                <Briefcase size={22} strokeWidth={1.8} />
               )}
             </div>
 
@@ -531,7 +604,7 @@ const Applications = () => {
               <>
                 <h2 className="empty-state-title">No matching applications</h2>
                 <p className="empty-state-desc">
-                  No applications matched your current search or filter criteria. Try clearing them to see all records.
+                  No applications matched your current search or filter criteria. Try resetting them to see all records.
                 </p>
                 <button 
                   type="button" 
@@ -552,7 +625,7 @@ const Applications = () => {
                   className="btn-primary" 
                   onClick={handleOpenCreateModal}
                 >
-                  <Plus size={16} />
+                  <Plus size={15} strokeWidth={2.4} aria-hidden="true" />
                   <span>Add First Application</span>
                 </button>
               </>
@@ -566,7 +639,7 @@ const Applications = () => {
                 <thead>
                   <tr>
                     <th>Company</th>
-                    <th>Role</th>
+                    <th>Role & Source</th>
                     <th>Status</th>
                     <th>Applied Date</th>
                     <th>Interview Date</th>
@@ -574,203 +647,216 @@ const Applications = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {applications.map((app) => {
-                    const statusCfg = STATUS_CONFIG[app.status] || {
-                      label: app.status,
-                      color: '#000000',
-                      bg: '#FFFFFF',
-                      border: '#000000',
-                      dot: '#000000'
-                    };
-
-                    return (
-                      <tr key={app._id}>
-                        {/* Company */}
-                        <td>
-                          <div className="company-cell">
-                            <div className="company-avatar" aria-hidden="true">
-                              {app.companyName?.charAt(0)?.toUpperCase() || 'C'}
-                            </div>
-                            <div className="company-info">
-                              {app.companyWebsite ? (
-                                <a 
-                                  href={app.companyWebsite.startsWith('http') ? app.companyWebsite : `https://${app.companyWebsite}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="company-name-link"
-                                  title={`Visit ${app.companyName}`}
-                                >
-                                  <span>{app.companyName}</span>
-                                  <ExternalLink size={12} aria-hidden="true" />
-                                </a>
-                              ) : (
-                                <span style={{ fontWeight: 600 }}>{app.companyName}</span>
-                              )}
-                              {app.hrEmail && (
-                                <span className="company-subtext">{app.hrEmail}</span>
-                              )}
-                            </div>
+                  {applications.map((app) => (
+                    <tr key={app._id}>
+                      {/* Company */}
+                      <td>
+                        <div className="company-cell">
+                          <div className="company-avatar" aria-hidden="true">
+                            {app.companyName?.charAt(0)?.toUpperCase() || 'C'}
                           </div>
-                        </td>
+                          <div className="company-info">
+                            {app.companyWebsite ? (
+                              <a 
+                                href={app.companyWebsite.startsWith('http') ? app.companyWebsite : `https://${app.companyWebsite}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="company-name-link"
+                                title={`Visit ${app.companyName}`}
+                              >
+                                <span>{app.companyName}</span>
+                                <ExternalLink size={11} strokeWidth={2} aria-hidden="true" />
+                              </a>
+                            ) : (
+                              <span className="company-name-text">{app.companyName}</span>
+                            )}
+                            {app.hrEmail && (
+                              <span className="company-subtext">{app.hrEmail}</span>
+                            )}
+                          </div>
+                        </div>
+                      </td>
 
-                        {/* Role & Source */}
-                        <td>
-                          <div className="role-title">{app.role}</div>
-                          {app.applicationSource && (
-                            <span className="source-badge">{app.applicationSource}</span>
-                          )}
-                        </td>
+                      {/* Role & Source */}
+                      <td>
+                        <div className="role-title">{app.role}</div>
+                        {app.applicationSource && (
+                          <span className="source-badge">{app.applicationSource}</span>
+                        )}
+                      </td>
 
-                        {/* Status Badge */}
-                        <td>
-                          <span 
-                            className="app-status-badge"
-                            style={{ 
-                              color: statusCfg.color, 
-                              backgroundColor: statusCfg.bg,
-                              border: `1px solid ${statusCfg.border || '#000000'}`
-                            }}
-                          >
-                            <span 
-                              className="app-status-dot" 
-                              style={{ backgroundColor: statusCfg.dot || statusCfg.color }}
-                              aria-hidden="true"
-                            />
-                            {app.status}
-                          </span>
-                        </td>
-
-                        {/* Applied Date */}
-                        <td>
-                          <span>
-                            {formatDate(app.appliedDate)}
-                          </span>
-                        </td>
-
-                        {/* Interview Date */}
-                        <td>
-                          {app.interviewDate ? (
-                            <span style={{ fontWeight: 600, color: '#0000FF' }}>
-                              {formatInterviewDate(app.interviewDate)}
-                            </span>
+                      {/* Status Dropdown */}
+                      <td>
+                        <div 
+                          className={`status-dropdown-wrap ${getStatusBadgeClass(app.status)} ${updatingStatusId === app._id ? 'is-updating' : ''}`}
+                          title="Click to change status"
+                        >
+                          {updatingStatusId === app._id ? (
+                            <div className="status-updating-indicator">
+                              <Loader2 size={11} className="spin-animate" aria-hidden="true" />
+                              <span>{app.status}</span>
+                            </div>
                           ) : (
-                            <span style={{ color: '#000000' }}>—</span>
+                            <div className="status-select-container">
+                              <select
+                                className="status-select-control"
+                                value={app.status}
+                                onChange={(e) => handleInlineStatusChange(app, e.target.value)}
+                                disabled={updatingStatusId === app._id}
+                                aria-label={`Change status for ${app.companyName} (${app.role})`}
+                              >
+                                {CANONICAL_STATUSES.map((st) => (
+                                  <option key={st} value={st}>
+                                    {st}
+                                  </option>
+                                ))}
+                              </select>
+                              <ChevronDown size={11} strokeWidth={2.5} className="status-select-arrow" aria-hidden="true" />
+                            </div>
                           )}
-                        </td>
+                        </div>
+                      </td>
 
-                        {/* Actions */}
-                        <td>
-                          <div className="row-actions">
-                            <button
-                              type="button"
-                              className="action-btn"
-                              onClick={() => handleOpenEditModal(app)}
-                              title={`Edit ${app.companyName} application`}
-                              aria-label={`Edit ${app.companyName} application`}
-                            >
-                              <Pencil size={15} />
-                            </button>
-                            <button
-                              type="button"
-                              className="action-btn delete-btn"
-                              onClick={() => handleOpenDeleteModal(app)}
-                              title={`Delete ${app.companyName} application`}
-                              aria-label={`Delete ${app.companyName} application`}
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                      {/* Applied Date */}
+                      <td>
+                        <span className="date-text">
+                          {formatDate(app.appliedDate)}
+                        </span>
+                      </td>
+
+                      {/* Interview Date */}
+                      <td>
+                        {app.interviewDate ? (
+                          <span className="interview-date-text">
+                            <CalendarDays size={13} strokeWidth={2} className="interview-date-icon" aria-hidden="true" />
+                            <span>{formatInterviewDate(app.interviewDate)}</span>
+                          </span>
+                        ) : (
+                          <span className="date-empty">—</span>
+                        )}
+                      </td>
+
+                      {/* Actions */}
+                      <td>
+                        <div className="row-actions">
+                          <button
+                            type="button"
+                            className="action-btn"
+                            onClick={() => handleOpenEditModal(app)}
+                            title={`Edit ${app.companyName} application`}
+                            aria-label={`Edit ${app.companyName} application`}
+                          >
+                            <Pencil size={14} strokeWidth={1.8} />
+                          </button>
+                          <button
+                            type="button"
+                            className="action-btn delete-btn"
+                            onClick={() => handleOpenDeleteModal(app)}
+                            title={`Delete ${app.companyName} application`}
+                            aria-label={`Delete ${app.companyName} application`}
+                          >
+                            <Trash2 size={14} strokeWidth={1.8} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
 
             {/* Mobile Cards (Responsive Layout < 768px) */}
             <div className="mobile-cards-list">
-              {applications.map((app) => {
-                const statusCfg = STATUS_CONFIG[app.status] || {
-                  label: app.status,
-                  color: '#000000',
-                  bg: '#FFFFFF',
-                  border: '#000000',
-                  dot: '#000000'
-                };
-
-                return (
-                  <article key={app._id} className="mobile-app-card">
-                    <div className="mobile-card-header">
-                      <div>
-                        <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#000000' }}>
-                          {app.companyName}
-                        </h3>
-                        <p style={{ fontSize: '0.875rem', color: '#000000' }}>
-                          {app.role}
-                        </p>
+              {applications.map((app) => (
+                <article key={app._id} className="mobile-app-card">
+                  <div className="mobile-card-header">
+                    <div className="mobile-card-brand">
+                      <div className="company-avatar" aria-hidden="true">
+                        {app.companyName?.charAt(0)?.toUpperCase() || 'C'}
                       </div>
-
-                      <span 
-                        className="app-status-badge"
-                        style={{ 
-                          color: statusCfg.color, 
-                          backgroundColor: statusCfg.bg,
-                          border: `1px solid ${statusCfg.border || '#000000'}`
-                        }}
-                      >
-                        <span 
-                          className="app-status-dot" 
-                          style={{ backgroundColor: statusCfg.dot || statusCfg.color }}
-                        />
-                        {app.status}
-                      </span>
+                      <div className="mobile-card-title-group">
+                        <h3 className="mobile-card-company">{app.companyName}</h3>
+                        <p className="mobile-card-role">{app.role}</p>
+                      </div>
                     </div>
 
-                    <div className="mobile-card-meta">
-                      <div>
-                        <strong>Applied:</strong> {formatDate(app.appliedDate)}
-                      </div>
-                      {app.interviewDate && (
-                        <div style={{ color: '#0000FF' }}>
-                          <strong>Interview:</strong> {formatInterviewDate(app.interviewDate)}
+                    <div 
+                      className={`status-dropdown-wrap ${getStatusBadgeClass(app.status)} ${updatingStatusId === app._id ? 'is-updating' : ''}`}
+                      title="Click to change status"
+                    >
+                      {updatingStatusId === app._id ? (
+                        <div className="status-updating-indicator">
+                          <Loader2 size={11} className="spin-animate" aria-hidden="true" />
+                          <span>{app.status}</span>
                         </div>
-                      )}
-                      {app.applicationSource && (
-                        <div>
-                          <strong>Source:</strong> {app.applicationSource}
+                      ) : (
+                        <div className="status-select-container">
+                          <select
+                            className="status-select-control"
+                            value={app.status}
+                            onChange={(e) => handleInlineStatusChange(app, e.target.value)}
+                            disabled={updatingStatusId === app._id}
+                            aria-label={`Change status for ${app.companyName} (${app.role})`}
+                          >
+                            {CANONICAL_STATUSES.map((st) => (
+                              <option key={st} value={st}>
+                                {st}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown size={11} strokeWidth={2.5} className="status-select-arrow" aria-hidden="true" />
                         </div>
                       )}
                     </div>
+                  </div>
 
-                    <div className="mobile-card-actions">
-                      <button
-                        type="button"
-                        className="btn-secondary"
-                        style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}
-                        onClick={() => handleOpenEditModal(app)}
-                      >
-                        <Pencil size={14} />
-                        <span>Edit</span>
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-secondary"
-                        style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', color: '#000000' }}
-                        onClick={() => handleOpenDeleteModal(app)}
-                      >
-                        <Trash2 size={14} />
-                        <span>Delete</span>
-                      </button>
+                  <div className="mobile-card-meta">
+                    <div className="mobile-meta-item">
+                      <span className="mobile-meta-label">Applied:</span>
+                      <span className="mobile-meta-val">{formatDate(app.appliedDate)}</span>
                     </div>
-                  </article>
-                );
-              })}
+                    {app.interviewDate && (
+                      <div className="mobile-meta-item highlight">
+                        <span className="mobile-meta-label">
+                          <CalendarDays size={11} strokeWidth={2} className="mobile-interview-icon" aria-hidden="true" />
+                          <span>Interview:</span>
+                        </span>
+                        <span className="mobile-meta-val">{formatInterviewDate(app.interviewDate)}</span>
+                      </div>
+                    )}
+                    {app.applicationSource && (
+                      <div className="mobile-meta-item">
+                        <span className="mobile-meta-label">Source:</span>
+                        <span className="mobile-meta-val">{app.applicationSource}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mobile-card-actions">
+                    <button
+                      type="button"
+                      className="btn-secondary mobile-action-btn"
+                      onClick={() => handleOpenEditModal(app)}
+                    >
+                      <Pencil size={13} strokeWidth={1.8} />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-secondary mobile-action-btn delete-action"
+                      onClick={() => handleOpenDeleteModal(app)}
+                    >
+                      <Trash2 size={13} strokeWidth={1.8} />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                </article>
+              ))}
             </div>
 
             {/* ── Pagination Controls ── */}
             <footer className="applications-pagination">
-              <span>
+              <span className="pagination-info">
                 Page {page} {applications.length > 0 && `(${applications.length} on this page)`}
               </span>
 
@@ -782,7 +868,7 @@ const Applications = () => {
                   disabled={page <= 1 || isLoading}
                   aria-label="Previous page"
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={15} strokeWidth={2} />
                   <span>Previous</span>
                 </button>
                 <button
@@ -793,7 +879,7 @@ const Applications = () => {
                   aria-label="Next page"
                 >
                   <span>Next</span>
-                  <ChevronRight size={16} />
+                  <ChevronRight size={15} strokeWidth={2} />
                 </button>
               </div>
             </footer>
@@ -824,7 +910,7 @@ const Applications = () => {
                 onClick={() => !isCreating && setIsCreateOpen(false)}
                 aria-label="Close modal"
               >
-                <X size={18} />
+                <X size={16} strokeWidth={2} />
               </button>
             </div>
 
@@ -832,7 +918,7 @@ const Applications = () => {
               <div className="modal-body">
                 {createApiError && (
                   <div className="app-alert app-alert-error" role="alert">
-                    <AlertCircle size={16} />
+                    <AlertCircle size={16} strokeWidth={2} />
                     <span>{createApiError}</span>
                   </div>
                 )}
@@ -994,7 +1080,7 @@ const Applications = () => {
                 onClick={() => !isUpdating && setEditingApp(null)}
                 aria-label="Close modal"
               >
-                <X size={18} />
+                <X size={16} strokeWidth={2} />
               </button>
             </div>
 
@@ -1002,7 +1088,7 @@ const Applications = () => {
               <div className="modal-body">
                 {editApiError && (
                   <div className="app-alert app-alert-error" role="alert">
-                    <AlertCircle size={16} />
+                    <AlertCircle size={16} strokeWidth={2} />
                     <span>{editApiError}</span>
                   </div>
                 )}
@@ -1079,9 +1165,9 @@ const Applications = () => {
 
                 {/* Conditional Interview Date field when status is an Interview status */}
                 {INTERVIEW_STATUSES.includes(editForm.status) && (
-                  <div className="modal-field" style={{ background: '#FFFFFF', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid #0000FF' }}>
-                    <label htmlFor="edit-interviewDate" style={{ color: '#0000FF' }}>
-                      Interview Date <span className="required-star">*</span>
+                  <div className="modal-field-interview-alert">
+                    <label htmlFor="edit-interviewDate" className="interview-alert-label">
+                      Interview Date & Time <span className="required-star">*</span>
                     </label>
                     <input
                       id="edit-interviewDate"
@@ -1175,8 +1261,7 @@ const Applications = () => {
       {deletingApp && (
         <div className="modal-backdrop" onClick={() => !isDeleting && setDeletingApp(null)}>
           <div 
-            className="modal-dialog" 
-            style={{ maxWidth: '440px' }}
+            className="modal-dialog modal-dialog-delete" 
             onClick={(e) => e.stopPropagation()}
             role="alertdialog"
             aria-modal="true"
@@ -1184,7 +1269,7 @@ const Applications = () => {
             aria-describedby="delete-dialog-desc"
           >
             <div className="modal-header">
-              <h2 id="delete-dialog-title" className="modal-title" style={{ color: '#000000' }}>
+              <h2 id="delete-dialog-title" className="modal-title">
                 Delete Application
               </h2>
               <button 
@@ -1193,23 +1278,23 @@ const Applications = () => {
                 onClick={() => !isDeleting && setDeletingApp(null)}
                 aria-label="Close dialog"
               >
-                <X size={18} />
+                <X size={16} strokeWidth={2} />
               </button>
             </div>
 
             <div className="modal-body">
               {deleteApiError && (
                 <div className="app-alert app-alert-error" role="alert">
-                  <AlertCircle size={16} />
+                  <AlertCircle size={16} strokeWidth={2} />
                   <span>{deleteApiError}</span>
                 </div>
               )}
 
-              <p id="delete-dialog-desc" style={{ fontSize: '0.9375rem', lineHeight: 1.5, color: 'var(--text-primary)' }}>
+              <p id="delete-dialog-desc" className="delete-confirm-text">
                 Are you sure you want to delete your application for{' '}
                 <strong>{deletingApp.role}</strong> at <strong>{deletingApp.companyName}</strong>?
               </p>
-              <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+              <p className="delete-confirm-sub">
                 This record and its associated history will be permanently removed.
               </p>
             </div>
@@ -1232,6 +1317,92 @@ const Applications = () => {
                 {isDeleting ? 'Deleting...' : 'Delete Application'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* ═════════════════════════════════════════════════════════════════════════
+          INTERVIEW DATE PROMPT MODAL (FOR INLINE STATUS TRANSITIONS)
+          ═════════════════════════════════════════════════════════════════════════ */}
+      {datePrompt && (
+        <div className="modal-backdrop" onClick={() => !updatingStatusId && setDatePrompt(null)}>
+          <div 
+            className="modal-dialog modal-dialog-prompt"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="prompt-modal-title"
+          >
+            <div className="modal-header">
+              <div className="modal-title-group">
+                <h2 id="prompt-modal-title" className="modal-title">
+                  Interview Date Required
+                </h2>
+                <span className="modal-subtitle">
+                  Moving to &ldquo;{datePrompt.targetStatus}&rdquo; requires an interview date
+                </span>
+              </div>
+              <button 
+                type="button" 
+                className="modal-close-btn" 
+                onClick={() => !updatingStatusId && setDatePrompt(null)}
+                aria-label="Close dialog"
+              >
+                <X size={16} strokeWidth={2} />
+              </button>
+            </div>
+
+            <form onSubmit={handleDatePromptSubmit} noValidate>
+              <div className="modal-body">
+                {datePromptError && (
+                  <div className="app-alert app-alert-error" role="alert">
+                    <AlertCircle size={16} strokeWidth={2} />
+                    <span>{datePromptError}</span>
+                  </div>
+                )}
+
+                <p className="prompt-lead-text">
+                  To update <strong>{datePrompt.app.companyName}</strong> ({datePrompt.app.role}) to{' '}
+                  <span className="cf-status-pill badge-blue">{datePrompt.targetStatus}</span>, please specify the interview date.
+                </p>
+
+                <div className="modal-field">
+                  <label htmlFor="prompt-interviewDate">
+                    Interview Date <span className="required-star">*</span>
+                  </label>
+                  <input
+                    id="prompt-interviewDate"
+                    type="date"
+                    className={`modal-input${datePromptError ? ' has-error' : ''}`}
+                    value={datePrompt.interviewDate}
+                    onChange={(e) => {
+                      setDatePrompt({ ...datePrompt, interviewDate: e.target.value });
+                      setDatePromptError('');
+                    }}
+                    required
+                    disabled={updatingStatusId === datePrompt.app._id}
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setDatePrompt(null)}
+                  disabled={updatingStatusId === datePrompt.app._id}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={updatingStatusId === datePrompt.app._id}
+                >
+                  {updatingStatusId === datePrompt.app._id ? 'Updating...' : 'Save & Update Status'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

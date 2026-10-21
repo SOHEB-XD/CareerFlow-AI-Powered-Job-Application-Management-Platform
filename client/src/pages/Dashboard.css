@@ -476,8 +476,8 @@
 .cf-status-pill {
   display: inline-flex;
   align-items: center;
-  padding: 3px 8px;
-  border-radius: 3px;
+  padding: 5px 8px !important;
+  border-radius: 2px;
   font-family: var(--font-display);
   font-size: 0.6875rem;
   font-weight: 700;
@@ -566,10 +566,10 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 2px 7px;
+  padding: 6px 7px;
   background-color: var(--color-blue);
   color: #FFFFFF;
-  border-radius: 3px;
+  border-radius: 2px;
   flex-shrink: 0;
 }
 
@@ -635,9 +635,12 @@
 }
 
 @keyframes cf-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.45;
   }
@@ -705,14 +708,293 @@
     width: 100%;
     justify-content: space-between;
   }
+
+  .cf-modal-dialog {
+    max-width: calc(100vw - 24px);
+  }
+
+  .cf-modal-header {
+    padding: 18px 16px 14px 16px;
+  }
+
+  .cf-modal-title {
+    font-size: 1.125rem;
+  }
+
+  .cf-modal-body {
+    padding: 12px 16px;
+  }
+
+  .cf-modal-footer {
+    padding: 14px 16px;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .cf-modal-btn-secondary,
+  .cf-modal-btn-primary {
+    width: 100%;
+  }
+}
+
+/* ── Upcoming Interviews Modal ── */
+.cf-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.cf-modal-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  background-color: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 32px);
+  overflow: hidden;
+  outline: none;
+}
+
+.cf-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 24px 18px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: #FFFFFF;
+}
+
+.cf-modal-title-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.cf-modal-title {
+  font-family: var(--font-display, 'Sora', sans-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #000000;
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.cf-modal-subtitle {
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.65);
+  margin: 4px 0 0 0;
+  line-height: 1.4;
+}
+
+.cf-modal-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+  margin-top: -2px;
+}
+
+.cf-modal-close-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #000000;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.cf-modal-close-btn:focus-visible {
+  outline: 2px solid var(--color-blue, #0000FF);
+  outline-offset: 2px;
+}
+
+.cf-modal-body {
+  padding: 16px 24px;
+  overflow-y: auto;
+  flex: 1;
+  max-height: 340px;
+}
+
+.cf-modal-interviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cf-modal-interview-item {
+  padding: 14px 16px;
+  background-color: #FAFAFA;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 3px;
+  transition: border-color 0.15s ease;
+}
+
+.cf-modal-interview-item:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.cf-modal-interview-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cf-modal-interview-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cf-modal-interview-company {
+  font-family: var(--font-display, 'Sora', sans-serif);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #000000;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cf-modal-interview-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 2px;
+  font-family: var(--font-display, 'Sora', sans-serif);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background-color: var(--color-blue, #0000FF);
+  color: #FFFFFF;
+  flex-shrink: 0;
+}
+
+.cf-modal-interview-role {
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.7);
+  font-weight: 500;
+}
+
+.cf-modal-interview-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.cf-modal-interview-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.cf-modal-interview-meta-item svg {
+  color: var(--color-blue, #0000FF);
+  flex-shrink: 0;
+}
+
+.cf-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: #FFFFFF;
+}
+
+.cf-modal-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 18px;
+  background-color: #FFFFFF;
+  color: #000000;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  font-family: var(--font-display, 'Sora', sans-serif);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cf-modal-btn-secondary:hover {
+  border-color: #000000;
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.cf-modal-btn-secondary:focus-visible {
+  outline: 2px solid var(--color-blue, #0000FF);
+  outline-offset: 2px;
+}
+
+.cf-modal-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  background-color: var(--color-blue, #0000FF);
+  color: #FFFFFF;
+  border: 1px solid var(--color-blue, #0000FF);
+  border-radius: 2px;
+  font-family: var(--font-display, 'Sora', sans-serif);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cf-modal-btn-primary:hover {
+  background-color: #000000;
+  border-color: #000000;
+}
+
+.cf-modal-btn-primary:focus-visible {
+  outline: 2px solid var(--color-blue, #0000FF);
+  outline-offset: 2px;
 }
 
 /* ── Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
+
   .cf-btn-primary,
   .cf-metric-card,
   .cf-interview-card,
-  .cf-table-row {
+  .cf-table-row,
+  .cf-modal-dialog,
+  .cf-modal-backdrop,
+  .cf-modal-close-btn,
+  .cf-modal-btn-primary,
+  .cf-modal-btn-secondary {
     transition: none !important;
     transform: none !important;
   }

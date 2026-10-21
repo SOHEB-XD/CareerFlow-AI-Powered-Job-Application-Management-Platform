@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { 
   Calendar, 
   Briefcase, 
   AlertCircle, 
   Plus, 
   ArrowRight, 
-  CalendarDays
+  CalendarDays,
+  Clock,
+  X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getDashboardStats, getRecentApplications, getUpcomingInterviews } from '../api/dashboard';
@@ -47,6 +49,47 @@ const formatInterviewDate = (dateStr) => {
   } catch {
     return dateStr;
   }
+};
+
+const isUpcomingDate = (dateStr) => {
+  if (!dateStr) return false;
+  try {
+    const interviewTime = new Date(dateStr).getTime();
+    if (isNaN(interviewTime)) return false;
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    return interviewTime >= startOfToday;
+  } catch {
+    return false;
+  }
+};
+
+const formatModalDateTime = (dateStr) => {
+  if (!dateStr) return { date: '—', time: '' };
+  try {
+    const d = new Date(dateStr);
+    const dateFormatted = d.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+    // Check if a specific time is provided (non-zero UTC time or specific time component)
+    const hasTime = d.getUTCHours() !== 0 || d.getUTCMinutes() !== 0 || (dateStr.includes('T') && !dateStr.endsWith('00:00:00.000Z') && !dateStr.endsWith('00:00:00Z'));
+    const timeFormatted = hasTime ? d.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit'
+    }) : '';
+    return { date: dateFormatted, time: timeFormatted };
+  } catch {
+    return { date: dateStr, time: '' };
+  }
+};
+
+const getSessionKey = (user) => {
+  if (!user) return null;
+  const uid = user.id || user._id || user.email || 'user';
+  return `careerflow_interviews_modal_shown_${uid}`;
 };
 
 // Canonical status presentation locked to #000000, #FFFFFF, #0000FF
@@ -165,6 +208,12 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
 
+  // ── Upcoming Interviews Reminder Modal State & Focus Refs ──
+  const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
+  const hasCheckedModalRef = useRef(false);
+  const modalRef = useRef(null);
+  const prevFocusRef = useRef(null);
+
   useEffect(() => {
     let ignore = false;
 
@@ -176,10 +225,24 @@ const Dashboard = () => {
           getUpcomingInterviews(),
         ]);
         if (!ignore) {
+          const upcomingList = interviewsRes.data?.data || [];
           setStats(statsRes.data?.data || null);
           setRecent(recentRes.data?.data || []);
-          setInterviews(interviewsRes.data?.data || []);
+          setInterviews(upcomingList);
           setError(null);
+
+          // Check upcoming interviews for the session modal once data has loaded successfully
+          if (user && !hasCheckedModalRef.current) {
+            hasCheckedModalRef.current = true;
+            const sessionKey = getSessionKey(user);
+            if (sessionKey && !sessionStorage.getItem(sessionKey)) {
+              const validUpcoming = upcomingList.filter((item) => isUpcomingDate(item.interviewDate));
+              if (validUpcoming.length > 0) {
+                setIsInterviewModalOpen(true);
+                sessionStorage.setItem(sessionKey, 'true');
+              }
+            }
+          }
         }
       } catch (err) {
         if (!ignore) {
@@ -200,13 +263,91 @@ const Dashboard = () => {
     return () => {
       ignore = true;
     };
-  }, [reloadKey]);
+  }, [reloadKey, user]);
 
   const handleRetry = () => {
     setLoading(true);
     setError(null);
     setReloadKey((prev) => prev + 1);
   };
+
+  const handleCloseModal = useCallback(() => {
+    setIsInterviewModalOpen(false);
+    const sessionKey = getSessionKey(user);
+    if (sessionKey) {
+      sessionStorage.setItem(sessionKey, 'true');
+    }
+  }, [user]);
+
+  const handleViewApplications = () => {
+    handleCloseModal();
+    navigate('/dashboard/applications');
+  };
+
+  // Keyboard accessibility (Escape key) and background scroll lock
+  useEffect(() => {
+    if (!isInterviewModalOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleCloseModal();
+      }
+    };
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isInterviewModalOpen, handleCloseModal]);
+
+  // Focus management: preserve previous element, focus modal, restore on close
+  useEffect(() => {
+    if (isInterviewModalOpen) {
+      prevFocusRef.current = document.activeElement;
+      const focusTimer = setTimeout(() => {
+        const primaryBtn = modalRef.current?.querySelector('.cf-modal-btn-primary');
+        if (primaryBtn) {
+          primaryBtn.focus();
+        } else {
+          modalRef.current?.focus();
+        }
+      }, 50);
+      return () => clearTimeout(focusTimer);
+    } else if (prevFocusRef.current && typeof prevFocusRef.current.focus === 'function') {
+      prevFocusRef.current.focus();
+      prevFocusRef.current = null;
+    }
+  }, [isInterviewModalOpen]);
+
+  // Focus trap inside modal
+  const handleModalKeyDown = (e) => {
+    if (e.key !== 'Tab' || !modalRef.current) return;
+    const focusable = modalRef.current.querySelectorAll(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable.length === 0) return;
+    const firstElement = focusable[0];
+    const lastElement = focusable[focusable.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+      }
+    } else {
+      if (document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
+      }
+    }
+  };
+
+  const validUpcomingInterviews = interviews.filter((item) => isUpcomingDate(item.interviewDate));
 
   const activeCount = stats
     ? (stats.applied + stats.interviewScheduled + stats.technicalRound + stats.hrRound)
@@ -499,6 +640,101 @@ const Dashboard = () => {
           </div>
         </section>
       </div>
+
+      {/* ── Upcoming Interviews Reminder Modal ── */}
+      <AnimatePresence>
+        {isInterviewModalOpen && validUpcomingInterviews.length > 0 && (
+          <div 
+            className="cf-modal-backdrop" 
+            onClick={handleCloseModal}
+            role="presentation"
+          >
+            <motion.div
+              ref={modalRef}
+              className="cf-modal-dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="cf-modal-title"
+              aria-describedby="cf-modal-desc"
+              tabIndex={-1}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={handleModalKeyDown}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.98, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.98, y: 8 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+            >
+              <div className="cf-modal-header">
+                <div className="cf-modal-title-group">
+                  <h2 id="cf-modal-title" className="cf-modal-title">Upcoming interviews</h2>
+                  <p id="cf-modal-desc" className="cf-modal-subtitle">
+                    Here&apos;s what&apos;s coming up in your job search.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="cf-modal-close-btn"
+                  onClick={handleCloseModal}
+                  aria-label="Close modal"
+                >
+                  <X size={18} strokeWidth={2} aria-hidden="true" />
+                </button>
+              </div>
+
+              <div className="cf-modal-body">
+                <div className="cf-modal-interviews-list" role="list">
+                  {validUpcomingInterviews.map((item) => {
+                    const { date, time } = formatModalDateTime(item.interviewDate);
+                    return (
+                      <div key={item._id} className="cf-modal-interview-item" role="listitem">
+                        <div className="cf-modal-interview-main">
+                          <div className="cf-modal-interview-header-row">
+                            <span className="cf-modal-interview-company">{item.companyName}</span>
+                            <span className="cf-modal-interview-pill">
+                              {item.status || 'Interview Scheduled'}
+                            </span>
+                          </div>
+                          <span className="cf-modal-interview-role">{item.role}</span>
+                          <div className="cf-modal-interview-meta">
+                            <span className="cf-modal-interview-meta-item">
+                              <CalendarDays size={13} strokeWidth={2} aria-hidden="true" />
+                              <span>{date}</span>
+                            </span>
+                            {time && (
+                              <span className="cf-modal-interview-meta-item">
+                                <Clock size={13} strokeWidth={2} aria-hidden="true" />
+                                <span>{time}</span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="cf-modal-footer">
+                <button
+                  type="button"
+                  className="cf-modal-btn-secondary"
+                  onClick={handleCloseModal}
+                >
+                  Maybe later
+                </button>
+                <button
+                  type="button"
+                  className="cf-modal-btn-primary"
+                  onClick={handleViewApplications}
+                >
+                  <span>View applications</span>
+                  <ArrowRight size={14} strokeWidth={2.2} aria-hidden="true" />
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
