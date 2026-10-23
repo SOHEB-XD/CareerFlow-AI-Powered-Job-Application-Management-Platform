@@ -6,6 +6,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Applications from './pages/Applications';
+import Resume from './pages/Resume';
+import Communications from './pages/Communications';
 import Landing from './pages/Landing';
 
 // Generic placeholder for future protected routes
@@ -37,8 +39,8 @@ const App = () => {
           >
             <Route index element={<Dashboard />} />
             <Route path="applications" element={<Applications />} />
-            <Route path="resume" element={<Placeholder title="Resume" />} />
-            <Route path="communications" element={<Placeholder title="Communications" />} />
+            <Route path="resume" element={<Resume />} />
+            <Route path="communications" element={<Communications />} />
             <Route path="settings" element={<Placeholder title="Settings" />} />
           </Route>
 

@@ -220,9 +220,12 @@ const Applications = () => {
   const performStatusUpdate = async (app, newStatus, interviewDate) => {
     setUpdatingStatusId(app._id);
     try {
+      const isInterview = INTERVIEW_STATUSES.includes(newStatus);
       const payload = { status: newStatus };
-      if (interviewDate) {
+      if (isInterview && interviewDate) {
         payload.interviewDate = interviewDate;
+      } else if (!isInterview) {
+        payload.interviewDate = null;
       }
 
       const { data } = await updateApplication(app._id, payload);
@@ -251,13 +254,13 @@ const Applications = () => {
   const handleInlineStatusChange = async (app, newStatus) => {
     if (app.status === newStatus || updatingStatusId === app._id) return;
 
-    // Requirement 8: If interview-related status requires interview date and has none, prompt user
+    // Transition to a different interview-related status requires fresh interview date confirmation
     const isInterview = INTERVIEW_STATUSES.includes(newStatus);
-    if (isInterview && !app.interviewDate) {
+    if (isInterview) {
       setDatePrompt({
         app,
         targetStatus: newStatus,
-        interviewDate: new Date().toISOString().split('T')[0]
+        interviewDate: ''
       });
       setDatePromptError('');
       return;
@@ -364,13 +367,14 @@ const Applications = () => {
   // ── Handlers: Edit Application ──
   const handleOpenEditModal = (app) => {
     setEditingApp(app);
+    const isInterview = INTERVIEW_STATUSES.includes(app.status);
     setEditForm({
       companyName: app.companyName || '',
       role: app.role || '',
       status: app.status || 'Applied',
       applicationSource: app.applicationSource || 'LinkedIn',
       appliedDate: toInputDate(app.appliedDate),
-      interviewDate: toInputDate(app.interviewDate),
+      interviewDate: isInterview ? toInputDate(app.interviewDate) : '',
       companyWebsite: app.companyWebsite || '',
       hrEmail: app.hrEmail || '',
       notes: app.notes || ''
@@ -390,8 +394,7 @@ const Applications = () => {
 
     // If changing to or in an interview status, check interviewDate
     const isInterview = INTERVIEW_STATUSES.includes(editForm.status);
-    const hasStoredDate = !!editingApp.interviewDate;
-    if (isInterview && !editForm.interviewDate && !hasStoredDate) {
+    if (isInterview && !editForm.interviewDate) {
       errors.interviewDate = 'Please provide an interview date for this stage';
     }
 
@@ -413,8 +416,10 @@ const Applications = () => {
         notes: editForm.notes.trim()
       };
 
-      if (editForm.interviewDate) {
+      if (isInterview && editForm.interviewDate) {
         payload.interviewDate = editForm.interviewDate;
+      } else if (!isInterview) {
+        payload.interviewDate = null;
       }
 
       await updateApplication(editingApp._id, payload);
@@ -1138,7 +1143,28 @@ const Applications = () => {
                       id="edit-status"
                       className="modal-select"
                       value={editForm.status}
-                      onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                      onChange={(e) => {
+                        const nextStatus = e.target.value;
+                        const isChangingToDifferentInterview =
+                          INTERVIEW_STATUSES.includes(nextStatus) && nextStatus !== editingApp.status;
+                        const isNonInterview = !INTERVIEW_STATUSES.includes(nextStatus);
+
+                        let nextInterviewDate = editForm.interviewDate;
+                        if (isChangingToDifferentInterview || isNonInterview) {
+                          nextInterviewDate = '';
+                        } else if (nextStatus === editingApp.status && INTERVIEW_STATUSES.includes(editingApp.status)) {
+                          nextInterviewDate = toInputDate(editingApp.interviewDate);
+                        }
+
+                        setEditForm({
+                          ...editForm,
+                          status: nextStatus,
+                          interviewDate: nextInterviewDate
+                        });
+                        if (editFormErrors.interviewDate) {
+                          setEditFormErrors((prev) => ({ ...prev, interviewDate: undefined }));
+                        }
+                      }}
                       disabled={isUpdating}
                     >
                       {CANONICAL_STATUSES.map((st) => (

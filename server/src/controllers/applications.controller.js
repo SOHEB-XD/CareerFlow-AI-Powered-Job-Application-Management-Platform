@@ -140,11 +140,34 @@ const updateApplication = async (req, res) => {
         }
 
         const interviewStatuses = ['Interview Scheduled', 'Technical Round', 'HR Round'];
+        const nonInterviewStatuses = ['Applied', 'Offer Letter', 'Rejected', 'Withdrawn', 'No Response'];
+        const isStatusChanging = status !== undefined && status !== existingApplication.status;
         const targetStatus = status !== undefined ? status : existingApplication.status;
-        const effectiveInterviewDate = interviewDate !== undefined ? interviewDate : existingApplication.interviewDate;
 
-        if (interviewStatuses.includes(targetStatus) && !effectiveInterviewDate) {
-            return res.status(400).json({ message: 'Please Provide Interview Date' });
+        if (interviewStatuses.includes(targetStatus)) {
+            if (isStatusChanging) {
+                // Every transition to a different interview-related status must require a fresh, valid interviewDate
+                if (interviewDate === undefined || interviewDate === null || interviewDate === '') {
+                    return res.status(400).json({ message: 'Please Provide Interview Date' });
+                }
+                const parsedDate = new Date(interviewDate);
+                if (isNaN(parsedDate.getTime())) {
+                    return res.status(400).json({ message: 'Please Provide a valid Interview Date' });
+                }
+            } else {
+                // Status not changing - if interviewDate is explicitly sent, it must be valid and non-empty
+                if (interviewDate !== undefined) {
+                    if (interviewDate === null || interviewDate === '') {
+                        return res.status(400).json({ message: 'Please Provide Interview Date' });
+                    }
+                    const parsedDate = new Date(interviewDate);
+                    if (isNaN(parsedDate.getTime())) {
+                        return res.status(400).json({ message: 'Please Provide a valid Interview Date' });
+                    }
+                } else if (!existingApplication.interviewDate) {
+                    return res.status(400).json({ message: 'Please Provide Interview Date' });
+                }
+            }
         }
 
         const updateData = {};
@@ -156,13 +179,21 @@ const updateApplication = async (req, res) => {
             updateData.role = typeof role === 'string' ? role.trim() : role;
             updateData.normalizedRole = typeof role === 'string' ? role.trim().toLowerCase() : role;
         }
-        if (status !== undefined) updateData.status = status;
+        if (status !== undefined) {
+            updateData.status = status;
+            // Explicitly clear interviewDate when transitioning to or setting a non-interview status
+            if (nonInterviewStatuses.includes(status)) {
+                updateData.interviewDate = null;
+            }
+        }
         if (applicationSource !== undefined) updateData.applicationSource = typeof applicationSource === 'string' ? applicationSource.trim() : applicationSource;
         if (appliedDate !== undefined) updateData.appliedDate = appliedDate;
         if (companyWebsite !== undefined) updateData.companyWebsite = typeof companyWebsite === 'string' ? companyWebsite.trim() : '';
         if (hrEmail !== undefined) updateData.hrEmail = typeof hrEmail === 'string' ? hrEmail.trim() : '';
         if (notes !== undefined) updateData.notes = typeof notes === 'string' ? notes.trim() : '';
-        if (interviewDate !== undefined) updateData.interviewDate = interviewDate;
+        if (interviewStatuses.includes(targetStatus) && interviewDate !== undefined) {
+            updateData.interviewDate = interviewDate;
+        }
 
         const application = await Application.findOneAndUpdate(
             { _id: id, user: user._id },

@@ -4,7 +4,7 @@ import {
   LayoutDashboard, 
   Briefcase, 
   FileText, 
-  MessageSquare, 
+  Mail, 
   Settings, 
   LogOut 
 } from 'lucide-react';
@@ -15,7 +15,7 @@ const NAV_ITEMS = [
   { path: '/dashboard', label: 'Overview', icon: LayoutDashboard, end: true },
   { path: '/dashboard/applications', label: 'Applications', icon: Briefcase, end: false },
   { path: '/dashboard/resume', label: 'Resume', icon: FileText, end: false },
-  { path: '/dashboard/communications', label: 'Communications', icon: MessageSquare, end: false },
+  { path: '/dashboard/communications', label: 'AI Email Studio', icon: Mail, end: false },
 ];
 
 const Sidebar = ({ isOpen, onClose }) => {

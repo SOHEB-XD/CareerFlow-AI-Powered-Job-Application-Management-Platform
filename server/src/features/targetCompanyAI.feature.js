@@ -50,7 +50,8 @@ const getTargetCompanyPreview = async (req, res) => {
         }
 
 
-        const resume = await Resume.findOne({ user: user._id });
+        const resume = await Resume.findOne({ user: user._id, isCurrent: true })
+            || await Resume.findOne({ user: user._id }).sort({ version: -1, createdAt: -1 });
 
         if (!resume) {
             return res.status(400).json({ success: false, message: 'Resume not found' });

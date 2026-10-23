@@ -6,7 +6,7 @@ const ROUTE_TITLES = {
   '/dashboard': 'Overview',
   '/dashboard/applications': 'Applications',
   '/dashboard/resume': 'Resume',
-  '/dashboard/communications': 'Communications',
+  '/dashboard/communications': 'AI Email Studio',
   '/dashboard/settings': 'Settings',
 };
 

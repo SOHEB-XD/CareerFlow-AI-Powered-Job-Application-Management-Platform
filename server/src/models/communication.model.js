@@ -30,7 +30,10 @@ const communicationSchema = new mongoose.Schema(
             enum: [
                 "application",
                 "followup",
+                "recruiter_outreach",
                 "thank_you",
+                "interview_scheduling",
+                "other",
                 "feedback_request"
             ],
             required: true
@@ -57,6 +60,41 @@ const communicationSchema = new mongoose.Schema(
 
         sentAt: {
             type: Date
+        },
+
+        researchSummary: {
+            type: String,
+            default: ''
+        },
+
+        researchSources: [
+            {
+                title: { type: String, default: '' },
+                url: { type: String, default: '' }
+            }
+        ],
+
+        isResearchGrounded: {
+            type: Boolean,
+            default: false
+        },
+
+        resumeUsed: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Resume"
+        },
+
+        resumeVersion: {
+            type: Number
+        },
+
+        resumeFileName: {
+            type: String
+        },
+
+        userContext: {
+            type: String,
+            default: ''
         }
     },
     {

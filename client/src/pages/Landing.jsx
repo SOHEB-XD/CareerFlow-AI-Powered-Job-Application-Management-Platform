@@ -6,9 +6,9 @@ import {
   BriefcaseBusiness,
   FileText,
   Mail,
-  Clock,
-  Plus,
   CalendarDays,
+  ArrowRight,
+  ExternalLink,
 } from 'lucide-react';
 import './Landing.css';
 
@@ -41,33 +41,54 @@ const PAIN_POINTS = [
   },
 ];
 
-/* ─── GENUINE PRODUCT CAPABILITIES (Audited against actual codebase) ───────── */
-const PIPELINE_COLUMNS = [
+/* ─── AI EMAIL STUDIO WORKFLOW CAPABILITIES ────────────────────────────────── */
+const AI_STUDIO_STEPS = [
   {
-    name: 'Applied',
-    cards: [
-      { company: 'Linear', role: 'Product Engineer', source: 'LinkedIn', date: 'Oct 14' },
-      { company: 'Notion', role: 'Design Technologist', source: 'Referral', date: 'Oct 12' },
-    ],
+    num: '01',
+    title: 'Choose your opportunity',
+    desc: 'Select a saved company/application and the type of email you need.',
   },
   {
-    name: 'Interview Scheduled',
-    cards: [
-      { company: 'Vercel', role: 'Staff Frontend Engineer', source: 'Website', date: 'Oct 18', eventNote: 'Initial Screen' },
-    ],
+    num: '02',
+    title: 'Write with context',
+    desc: 'CareerFlow uses company research and, optionally, the resume version you choose to help tailor the draft.',
   },
   {
-    name: 'Technical Round',
-    cards: [
-      { company: 'Stripe', role: 'Infrastructure Engineer', source: 'Outreach', date: 'Oct 20', eventNote: 'System Design' },
-    ],
+    num: '03',
+    title: 'Review and send',
+    desc: 'Edit the message, then open it in Gmail to review and send.',
   },
-  {
-    name: 'Offer Letter',
-    cards: [
-      { company: 'Airbnb', role: 'Senior Product Engineer', source: 'LinkedIn', date: 'Decision: Friday', isOffer: true },
-    ],
-  },
+];
+
+/* ─── ILLUSTRATIVE DASHBOARD OVERVIEW DEMO DATA (Audited against actual Overview page) ── */
+const OVERVIEW_METRICS = [
+  { label: 'Total Applications', value: 12, sub: 'All logged entries' },
+  { label: 'Active Pipeline', value: 9, sub: 'In review or interview', highlight: true },
+  { label: 'Interviews', value: 3, sub: 'Scheduled & technical' },
+  { label: 'Offers Received', value: 1, sub: 'Ready for decision' },
+  { label: 'Archived', value: 2, sub: 'Closed or withdrawn' },
+];
+
+const OVERVIEW_STAGES = [
+  { label: 'Applied', count: 6, color: '#000000' },
+  { label: 'Interview', count: 1, color: '#0000FF' },
+  { label: 'Technical', count: 1, color: '#0000FF' },
+  { label: 'HR Round', count: 1, color: '#0000FF' },
+  { label: 'Offer', count: 1, color: '#000000' },
+  { label: 'Rejected', count: 1, color: 'rgba(0, 0, 0, 0.25)' },
+  { label: 'No Response', count: 1, color: 'rgba(0, 0, 0, 0.15)' },
+];
+
+const OVERVIEW_RECENT_APPS = [
+  { company: 'Linear', role: 'Product Engineer', status: 'Applied', statusType: 'neutral', date: 'Oct 14' },
+  { company: 'Vercel', role: 'Staff Frontend Engineer', status: 'Interview', statusType: 'blue', date: 'Oct 12' },
+  { company: 'Stripe', role: 'Infrastructure Engineer', status: 'Technical', statusType: 'blue', date: 'Oct 08' },
+  { company: 'Airbnb', role: 'Senior Product Engineer', status: 'Offer', statusType: 'black', date: 'Sep 28' },
+];
+
+const OVERVIEW_INTERVIEWS = [
+  { company: 'Vercel', role: 'Staff Frontend Engineer', dateStr: 'Thu, Oct 24, 10:00 AM' },
+  { company: 'Stripe', role: 'Infrastructure Engineer', dateStr: 'Mon, Oct 28, 02:30 PM' },
 ];
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -383,9 +404,9 @@ const Landing = () => {
             </p>
           </div>
 
-          {/* Genuine Feature Hierarchy: Primary Feature Spotlight + 3 Supporting Grid Features */}
+          {/* Core Feature Hierarchy: Primary Workflow Spotlight + 3 Supporting Grid Features */}
           <div className="cf-features-layout">
-            {/* Primary Spotlight Card */}
+            {/* Primary Spotlight Card: Stage-by-Stage Application Lifecycle */}
             <div className="cf-feature-spotlight cf-reveal">
               <div className="cf-spotlight-content">
                 <div className="cf-spotlight-tag">Primary Workflow</div>
@@ -408,7 +429,6 @@ const Landing = () => {
             {/* 3 Real Supporting Capabilities */}
             <div className="cf-features-subgrid">
               <div className="cf-subfeature-card cf-reveal cf-reveal-delay-1">
-
                 <h4 className="cf-subfeature-title">10-Day Stale Application Detection</h4>
                 <p className="cf-subfeature-body">
                   Built-in inactivity detection flags applications that have gone quiet for over 10 days,
@@ -417,7 +437,6 @@ const Landing = () => {
               </div>
 
               <div className="cf-subfeature-card cf-reveal cf-reveal-delay-2">
-
                 <h4 className="cf-subfeature-title">Interview Date & Schedule Tracking</h4>
                 <p className="cf-subfeature-body">
                   Enforces explicit interview dates when rounds are scheduled, keeping upcoming rounds
@@ -426,7 +445,6 @@ const Landing = () => {
               </div>
 
               <div className="cf-subfeature-card cf-reveal cf-reveal-delay-3">
-
                 <h4 className="cf-subfeature-title">Recruiter, Notes & Source Log</h4>
                 <p className="cf-subfeature-body">
                   Attach recruiter contact emails, referral sources (LinkedIn, Referral, Direct), company
@@ -438,14 +456,86 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ── 5. PRODUCT SHOWCASE (Pipeline Visualization) ───────────────────── */}
-      <section className="cf-section cf-showcase" id="pipeline" aria-label="Pipeline Showcase">
+      {/* ── 5. AI EMAIL STUDIO (Dedicated Editorial Feature Section) ─────────── */}
+      <section className="cf-section cf-ai-studio-section" id="ai-email-studio" aria-label="AI Email Studio">
+        <div className="cf-container">
+          {/* Primary Feature Spotlight: AI Email Studio (Refined White Editorial Art Direction) */}
+          <div className="cf-feature-spotlight cf-ai-spotlight cf-reveal">
+            <div className="cf-ai-spotlight-inner">
+              {/* Left Column: Editorial Hierarchy & 3-Step Sequence */}
+              <div className="cf-ai-spotlight-copy">
+                <span className="cf-ai-eyebrow">AI Email Studio</span>
+                <h3 className="cf-ai-headline">
+                  Make every email count.
+                </h3>
+                <p className="cf-ai-subcopy">
+                  Research the company, choose the resume that fits the role, and create a tailored email without starting from a blank page.
+                </p>
+
+                <div className="cf-ai-steps-sequence">
+                  {AI_STUDIO_STEPS.map((step) => (
+                    <div key={step.num} className="cf-ai-step-row">
+                      <span className="cf-ai-step-index">{step.num}</span>
+                      <div className="cf-ai-step-body">
+                        <h4 className="cf-ai-step-heading">{step.title}</h4>
+                        <p className="cf-ai-step-text">{step.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right Column: Single Calm, Light-Surface Email Workspace Preview */}
+              <div className="cf-ai-preview-panel">
+                <div className="cf-ai-preview-header">
+                  <span className="cf-ai-preview-title">Email draft</span>
+                  <span className="cf-ai-preview-app">Linear · Product Engineer</span>
+                </div>
+
+                <div className="cf-ai-preview-meta">
+                  <div className="cf-ai-meta-line">
+                    <span className="cf-ai-meta-label">Research context:</span>
+                    <span className="cf-ai-meta-value">Triage velocity and product craftsmanship</span>
+                  </div>
+                  <div className="cf-ai-meta-line">
+                    <span className="cf-ai-meta-label">Resume version:</span>
+                    <span className="cf-ai-meta-value">Frontend Systems (v3)</span>
+                  </div>
+                </div>
+
+                <div className="cf-ai-preview-draft">
+                  <div className="cf-ai-preview-subject">
+                    <span className="cf-ai-subject-prefix">Subject:</span>
+                    <span>Following up: Product Engineer Application</span>
+                  </div>
+                  <p className="cf-ai-preview-body">
+                    Hi Sarah — Following up on my recent application for the Product Engineer role. Given Linear's focus on issue triage velocity and craftsmanship, my experience scaling performant frontend architecture feels closely aligned with your roadmap…
+                  </p>
+                </div>
+
+                <div className="cf-ai-preview-footer">
+                  <span className="cf-ai-preview-note">
+                    Prefills recipient, subject, and body in Gmail. You review and send.
+                  </span>
+                  <Link to="/register" className="cf-ai-gmail-action" aria-label="Open Gmail to Send demo">
+                    <span>Open Gmail to Send</span>
+                    <ExternalLink size={12} strokeWidth={2.4} aria-hidden="true" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 6. PRODUCT SHOWCASE (Dashboard Overview Miniature) ─────────────── */}
+      <section className="cf-section cf-showcase" id="pipeline" aria-label="Dashboard Overview Showcase">
         <div className="cf-container">
           <div className="cf-showcase-header cf-reveal">
-            <span className="cf-label">The Pipeline</span>
+            <span className="cf-label">Dashboard Overview</span>
             <h2 className="cf-showcase-h2">Your Job Search, Structured.</h2>
             <p className="cf-showcase-sub">
-              Every round, company detail, and scheduled interview organized in a clear, scanning-friendly view.
+              Live pipeline velocity, upcoming interview dates, and recent application activity unified in a clean, distraction-free command center.
             </p>
           </div>
 
@@ -457,84 +547,181 @@ const Landing = () => {
                 <span className="cf-window-dot" />
                 <span className="cf-window-dot" />
               </div>
-              <span className="cf-window-url">app.careerflow.io/dashboard/applications</span>
+              <span className="cf-window-url">app.careerflow.io/dashboard</span>
             </div>
 
             {/* App interface layout */}
             <div className="cf-app-layout">
-              {/* Sidebar */}
+              {/* Black Sidebar */}
               <div className="cf-app-sidebar">
-                <div className="cf-sidebar-brand">CareerFlow</div>
-                <div className="cf-sidebar-item">
-                  <LayoutDashboard size={15} strokeWidth={1.8} aria-hidden="true" />
-                  <span>Overview</span>
+                <div className="cf-sidebar-brand-group">
+                  <div className="cf-sidebar-brand-mark" aria-hidden="true">
+                    <div className="cf-brand-mark-inner" />
+                  </div>
+                  <span className="cf-sidebar-brand-text">CareerFlow</span>
                 </div>
-                <div className="cf-sidebar-item active">
-                  <BriefcaseBusiness size={15} strokeWidth={1.8} aria-hidden="true" />
-                  <span>Applications</span>
-                </div>
-                <div className="cf-sidebar-item">
-                  <FileText size={15} strokeWidth={1.8} aria-hidden="true" />
-                  <span>Resumes</span>
-                </div>
-                <div className="cf-sidebar-item">
-                  <Mail size={15} strokeWidth={1.8} aria-hidden="true" />
-                  <span>Communications</span>
+
+                <div className="cf-sidebar-nav">
+                  <div className="cf-sidebar-item active">
+                    <LayoutDashboard size={14} strokeWidth={2} aria-hidden="true" />
+                    <span>Overview</span>
+                  </div>
+                  <div className="cf-sidebar-item">
+                    <BriefcaseBusiness size={14} strokeWidth={1.8} aria-hidden="true" />
+                    <span>Applications</span>
+                  </div>
+                  <div className="cf-sidebar-item">
+                    <FileText size={14} strokeWidth={1.8} aria-hidden="true" />
+                    <span>Resume</span>
+                  </div>
+                  <div className="cf-sidebar-item">
+                    <Mail size={14} strokeWidth={1.8} aria-hidden="true" />
+                    <span>AI Email Studio</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Main content */}
+              {/* White Main Workspace */}
               <div className="cf-app-main">
-                <div className="cf-app-toolbar">
-                  <div>
-                    <h3 className="cf-app-title">Applications</h3>
-                    <span className="cf-app-subtitle">Manage, track, and update all your job applications</span>
+                {/* Contextual Breadcrumb */}
+                <div className="cf-app-breadcrumb" aria-label="Breadcrumb preview">
+                  <span className="cf-crumb-brand">CAREERFLOW</span>
+                  <span className="cf-crumb-sep" aria-hidden="true">/</span>
+                  <span className="cf-crumb-current">OVERVIEW</span>
+                </div>
+
+                {/* Dashboard Page Header */}
+                <div className="cf-ov-header">
+                  <div className="cf-ov-header-text">
+                    <h3 className="cf-ov-greeting">Good morning.</h3>
+                    <p className="cf-ov-summary">
+                      You have 9 active applications in progress across your pipeline.
+                    </p>
                   </div>
-                  <div className="cf-app-actions">
-                    <button type="button" className="cf-app-check-btn" aria-label="Check inactive applications">
-                      <Clock size={13} strokeWidth={2} aria-hidden="true" />
-                      <span>Check Inactive</span>
-                    </button>
-                    <button type="button" className="cf-app-btn-add" aria-label="Add new application">
-                      <Plus size={14} strokeWidth={2.5} aria-hidden="true" />
-                      <span>Add Application</span>
-                    </button>
+                  <div className="cf-ov-header-actions">
+                    <Link to="/register" className="cf-ov-btn-primary" aria-label="Go to your applications">
+                      <span>Go to your applications →</span>
+                    </Link>
                   </div>
                 </div>
 
-                {/* Pipeline column board */}
-                <div className="cf-kanban">
-                  {PIPELINE_COLUMNS.map((col) => (
-                    <div key={col.name} className="cf-kanban-col">
-                      <div className="cf-kanban-col-header">
-                        <span className="cf-kanban-col-name">{col.name}</span>
-                        <span className="cf-kanban-count">{col.cards.length}</span>
+                {/* 5 Summary Metric Cards */}
+                <div className="cf-ov-metrics-strip" aria-label="Key search metrics">
+                  {OVERVIEW_METRICS.map((m, idx) => (
+                    <div key={idx} className="cf-ov-metric-card">
+                      <div className="cf-ov-metric-head">
+                        <span className="cf-ov-metric-label">{m.label}</span>
+                        {m.highlight && <span className="cf-ov-metric-dot" aria-hidden="true" />}
                       </div>
-                      <div className="cf-kanban-col-cards">
-                        {col.cards.map((card, ci) => (
-                          <div key={ci} className="cf-kanban-card">
-                            <div className="cf-kcard-header">
-                              <span className="cf-kcard-company">{card.company}</span>
-                              <span className="cf-kcard-source">{card.source}</span>
-                            </div>
-                            <div className="cf-kcard-role">{card.role}</div>
-                            <div className="cf-kcard-footer">
-                              <span className="cf-kcard-date">
-                                <CalendarDays size={12} strokeWidth={1.8} aria-hidden="true" />
-                                <span>{card.date}</span>
-                              </span>
-                              {card.eventNote && (
-                                <span className="cf-kcard-note">{card.eventNote}</span>
-                              )}
-                              {card.isOffer && (
-                                <span className="cf-kcard-offer-badge">Offer Ready</span>
-                              )}
-                            </div>
-                          </div>
-                        ))}
+                      <div className={`cf-ov-metric-val ${m.highlight ? 'highlight' : ''}`}>
+                        {m.value}
                       </div>
+                      <span className="cf-ov-metric-sub">{m.sub}</span>
                     </div>
                   ))}
+                </div>
+
+                {/* Application Pipeline Stage Distribution */}
+                <div className="cf-ov-pipeline-section" aria-label="Pipeline velocity">
+                  <div className="cf-ov-section-header">
+                    <span className="cf-ov-section-title">Application Pipeline</span>
+                    <span className="cf-ov-section-meta">Stage Distribution</span>
+                  </div>
+                  <div className="cf-ov-pipeline-card">
+                    <div className="cf-ov-pipeline-bar" aria-label="Pipeline distribution bar">
+                      {OVERVIEW_STAGES.map((st, idx) => {
+                        const pct = (st.count / 12) * 100;
+                        return (
+                          <div
+                            key={idx}
+                            className="cf-ov-pipeline-segment"
+                            style={{ backgroundColor: st.color, width: `${pct}%` }}
+                            title={`${st.label}: ${st.count}`}
+                          />
+                        );
+                      })}
+                    </div>
+                    <div className="cf-ov-pipeline-legend">
+                      {OVERVIEW_STAGES.map((st, idx) => (
+                        <div key={idx} className="cf-ov-legend-item">
+                          <span className="cf-ov-legend-dot" style={{ backgroundColor: st.color }} />
+                          <span className="cf-ov-legend-label">{st.label}</span>
+                          <span className="cf-ov-legend-count">{st.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Two-Column Operational Grid: Recent Applications & Upcoming Interviews */}
+                <div className="cf-ov-grid">
+                  {/* Left Column: Recent Applications */}
+                  <div className="cf-ov-column">
+                    <div className="cf-ov-col-header">
+                      <div className="cf-ov-col-title-group">
+                        <span className="cf-ov-col-title">Recent Applications</span>
+                        <span className="cf-ov-col-count">4</span>
+                      </div>
+                      <Link to="/register" className="cf-ov-col-link">
+                        <span>View all</span>
+                        <ArrowRight size={11} strokeWidth={2.4} aria-hidden="true" />
+                      </Link>
+                    </div>
+
+                    <div className="cf-ov-recent-table" role="table" aria-label="Recent applications table">
+                      {OVERVIEW_RECENT_APPS.map((app, idx) => (
+                        <div key={idx} className="cf-ov-table-row" role="row">
+                          <div className="cf-ov-app-info">
+                            <div className="cf-ov-avatar" aria-hidden="true">
+                              {app.company.charAt(0)}
+                            </div>
+                            <div className="cf-ov-app-details">
+                              <span className="cf-ov-company">{app.company}</span>
+                              <span className="cf-ov-role">{app.role}</span>
+                            </div>
+                          </div>
+                          <div className="cf-ov-app-meta">
+                            <span className={`cf-ov-status-pill pill-${app.statusType}`}>
+                              {app.status}
+                            </span>
+                            <span className="cf-ov-app-date">{app.date}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Right Column: Upcoming Interviews */}
+                  <div className="cf-ov-column">
+                    <div className="cf-ov-col-header">
+                      <div className="cf-ov-col-title-group">
+                        <span className="cf-ov-col-title">Upcoming Interviews</span>
+                        <span className="cf-ov-col-count cf-ov-count-alert">2</span>
+                      </div>
+                      <Link to="/register" className="cf-ov-col-link">
+                        <span>Manage</span>
+                        <ArrowRight size={11} strokeWidth={2.4} aria-hidden="true" />
+                      </Link>
+                    </div>
+
+                    <div className="cf-ov-interviews-stack">
+                      {OVERVIEW_INTERVIEWS.map((item, idx) => (
+                        <div key={idx} className="cf-ov-interview-card">
+                          <div className="cf-ov-interview-top">
+                            <div className="cf-ov-interview-info">
+                              <span className="cf-ov-interview-company">{item.company}</span>
+                              <span className="cf-ov-interview-role">{item.role}</span>
+                            </div>
+                            <span className="cf-ov-interview-badge">Scheduled</span>
+                          </div>
+                          <div className="cf-ov-interview-footer">
+                            <CalendarDays size={12} strokeWidth={2} aria-hidden="true" />
+                            <span>{item.dateStr}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
