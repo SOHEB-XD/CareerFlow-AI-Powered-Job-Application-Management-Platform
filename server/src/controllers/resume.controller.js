@@ -1,4 +1,5 @@
 const Resume = require('../models/resume.model');
+const { validateResumeFile } = require('../utils/fileValidation');
 
 /**
  * Get all resume versions for the authenticated user, sorted newest first.
@@ -16,7 +17,8 @@ const getResumeList = async (req, res) => {
             data: resumes
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('[Resume getResumeList Error]:', error.message);
+        res.status(500).json({ success: false, message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -43,7 +45,8 @@ const getCurrentResume = async (req, res) => {
             data: resume
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('[Resume getCurrentResume Error]:', error.message);
+        res.status(500).json({ success: false, message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -64,7 +67,8 @@ const getResumeById = async (req, res) => {
             data: resume
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('[Resume getResumeById Error]:', error.message);
+        res.status(500).json({ success: false, message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -80,27 +84,30 @@ const downloadResumeFile = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Resume not found' });
         }
 
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+
         if (resume.fileData && resume.fileData.length > 0) {
             const fileName = resume.originalFileName || `resume_v${resume.version || 1}.pdf`;
             res.setHeader('Content-Type', resume.fileContentType || 'application/octet-stream');
             res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`);
-            if (resume.fileSize) {
-                res.setHeader('Content-Length', resume.fileSize);
-            }
+            res.setHeader('Content-Length', resume.fileData.length);
             return res.send(resume.fileData);
         }
 
         // Fallback for legacy text-only resumes
         if (resume.resumeText) {
             const fileName = resume.originalFileName || `resume_v${resume.version || 1}.txt`;
+            const textBuffer = Buffer.from(resume.resumeText, 'utf8');
             res.setHeader('Content-Type', 'text/plain; charset=utf-8');
             res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`);
-            return res.send(Buffer.from(resume.resumeText, 'utf8'));
+            res.setHeader('Content-Length', textBuffer.length);
+            return res.send(textBuffer);
         }
 
         return res.status(404).json({ success: false, message: 'Original file content is not available for this record.' });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('[Resume downloadResumeFile Error]:', error.message);
+        res.status(500).json({ success: false, message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -114,54 +121,42 @@ const uploadResume = async (req, res) => {
         const { 
             originalFileName, 
             fileData, 
-            fileContentType, 
-            fileSize, 
             resumeText: clientResumeText, 
             note, 
             targetCompany, 
             targetRole 
-        } = req.body;
+        } = req.body || {};
 
-        if (!originalFileName || !originalFileName.trim()) {
+        if (!originalFileName || typeof originalFileName !== 'string' || !originalFileName.trim()) {
             return res.status(400).json({ success: false, message: 'Original file name is required' });
         }
 
-        const allowedExtensions = ['.pdf', '.docx', '.doc', '.txt', '.rtf'];
-        const ext = '.' + originalFileName.split('.').pop().toLowerCase();
-        if (!allowedExtensions.includes(ext)) {
+        if (!fileData) {
+            return res.status(400).json({ success: false, message: 'File data is required' });
+        }
+
+        // Validate decoded Buffer size, encoding, and format signatures
+        const fileValidation = validateResumeFile(fileData, originalFileName);
+        if (!fileValidation.valid) {
             return res.status(400).json({
                 success: false,
-                message: `Unsupported file format. Please upload one of: ${allowedExtensions.join(', ')}`
+                message: fileValidation.error
             });
         }
 
-        const maxSizeBytes = 10 * 1024 * 1024; // 10MB
-        if (fileSize && fileSize > maxSizeBytes) {
-            return res.status(400).json({
-                success: false,
-                message: 'File size exceeds maximum allowable limit of 10MB.'
-            });
-        }
-
-        let buffer = null;
-        if (fileData) {
-            try {
-                const base64Content = fileData.includes(',') ? fileData.split(',')[1] : fileData;
-                buffer = Buffer.from(base64Content, 'base64');
-            } catch (err) {
-                return res.status(400).json({ success: false, message: 'Invalid file data encoding' });
-            }
-        }
+        const buffer = fileValidation.buffer;
+        const validatedContentType = fileValidation.contentType;
+        const ext = fileValidation.extension;
 
         let extractedText = (clientResumeText || '').trim();
         if (!extractedText && buffer) {
             if (ext === '.pdf') {
                 try {
                     const pdfParse = require('pdf-parse');
-                    const pdfResult = await pdfParse(buffer);
+                    const pdfResult = await pdfParse(buffer, { max: 15 });
                     extractedText = (pdfResult.text || '').trim();
                 } catch (pdfErr) {
-                    console.error('PDF text extraction note:', pdfErr.message);
+                    console.error('[PDF Extraction Notice]:', pdfErr.message);
                 }
             } else if (ext === '.txt') {
                 extractedText = buffer.toString('utf8').trim();
@@ -176,7 +171,7 @@ const uploadResume = async (req, res) => {
         const latestResume = await Resume.findOne({ user: user._id }).sort({ version: -1 });
         const nextVersion = latestResume && typeof latestResume.version === 'number' ? latestResume.version + 1 : 1;
 
-        // Unset any previous current resume
+        // Unset any previous current resume only AFTER validation has passed
         await Resume.updateMany({ user: user._id }, { $set: { isCurrent: false } });
 
         const newResume = await Resume.create({
@@ -189,8 +184,8 @@ const uploadResume = async (req, res) => {
             targetCompany: (targetCompany || '').trim(),
             targetRole: (targetRole || '').trim(),
             fileData: buffer,
-            fileContentType: fileContentType || (ext === '.pdf' ? 'application/pdf' : 'text/plain'),
-            fileSize: fileSize || (buffer ? buffer.length : 0),
+            fileContentType: validatedContentType,
+            fileSize: buffer.length,
             processingStatus: 'completed'
         });
 
@@ -203,7 +198,14 @@ const uploadResume = async (req, res) => {
             data: result
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        if (error.code === 11000) {
+            return res.status(409).json({
+                success: false,
+                message: 'A resume version conflict occurred due to concurrent uploads. Please retry.'
+            });
+        }
+        console.error('[Resume uploadResume Error]:', error.message);
+        res.status(500).json({ success: false, message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -232,7 +234,8 @@ const setCurrentResume = async (req, res) => {
             data: result
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('[Resume setCurrentResume Error]:', error.message);
+        res.status(500).json({ success: false, message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -242,16 +245,16 @@ const setCurrentResume = async (req, res) => {
 const updateResumeNote = async (req, res) => {
     try {
         const { id } = req.params;
-        const { note, targetCompany, targetRole } = req.body;
+        const { note, targetCompany, targetRole } = req.body || {};
         const resume = await Resume.findOne({ _id: id, user: req.user._id });
 
         if (!resume) {
             return res.status(404).json({ success: false, message: 'Resume not found' });
         }
 
-        if (note !== undefined) resume.note = note.trim();
-        if (targetCompany !== undefined) resume.targetCompany = targetCompany.trim();
-        if (targetRole !== undefined) resume.targetRole = targetRole.trim();
+        if (note !== undefined) resume.note = typeof note === 'string' ? note.trim() : '';
+        if (targetCompany !== undefined) resume.targetCompany = typeof targetCompany === 'string' ? targetCompany.trim() : '';
+        if (targetRole !== undefined) resume.targetRole = typeof targetRole === 'string' ? targetRole.trim() : '';
 
         await resume.save();
 
@@ -264,7 +267,8 @@ const updateResumeNote = async (req, res) => {
             data: result
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('[Resume updateResumeNote Error]:', error.message);
+        res.status(500).json({ success: false, message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -298,7 +302,8 @@ const deleteResume = async (req, res) => {
             message: 'Resume version deleted successfully'
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('[Resume deleteResume Error]:', error.message);
+        res.status(500).json({ success: false, message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -312,3 +317,4 @@ module.exports = {
     updateResumeNote,
     deleteResume
 };
+

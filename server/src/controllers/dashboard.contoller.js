@@ -62,7 +62,8 @@ const getDashboardStats = async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[Dashboard getDashboardStats Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -91,7 +92,8 @@ const getRecentApplications = async (req, res) => {
             data: applications
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[Dashboard getRecentApplications Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
 };
 

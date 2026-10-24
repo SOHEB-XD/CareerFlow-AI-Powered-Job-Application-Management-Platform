@@ -20,9 +20,10 @@ const getDraftFollowUpEmails = async (req, res) => {
             data: communications
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[DraftEmails getDraftFollowUpEmails Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
-}
+};
 
 const getDraftApplicationEmails = async (req, res) => {
     try {
@@ -44,8 +45,9 @@ const getDraftApplicationEmails = async (req, res) => {
             data: communications
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[DraftEmails getDraftApplicationEmails Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
-}
+};
 
 module.exports = { getDraftFollowUpEmails, getDraftApplicationEmails };

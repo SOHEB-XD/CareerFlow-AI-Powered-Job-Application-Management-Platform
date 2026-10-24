@@ -4,9 +4,16 @@ const jwt = require('jsonwebtoken');
 
 const register = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password } = req.body || {};
 
-        const existingUser = await User.findOne({ email });
+        if (!name || typeof name !== 'string' || !name.trim() ||
+            !email || typeof email !== 'string' || !email.trim() ||
+            !password || typeof password !== 'string') {
+            return res.status(400).json({ message: 'Please provide all the required fields' });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const existingUser = await User.findOne({ email: normalizedEmail });
 
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
@@ -14,14 +21,15 @@ const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = await User.create({ name, email, password: hashedPassword });
+        const user = await User.create({ name: name.trim(), email: normalizedEmail, password: hashedPassword });
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             maxAge: 24 * 60 * 60 * 1000, // 24 hours
-            sameSite: 'strict'
+            sameSite: 'strict',
+            path: '/'
         });
 
         res.status(201).json({
@@ -34,20 +42,34 @@ const register = async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
+        console.error('[Auth Register Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
 };
 
 const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+        const { email, password } = req.body || {};
+
+        if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const user = await User.findOne({ email: normalizedEmail });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Invalid password' });
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
@@ -55,7 +77,8 @@ const login = async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             maxAge: 24 * 60 * 60 * 1000, // 24 hours
-            sameSite: 'strict'
+            sameSite: 'strict',
+            path: '/'
         });
 
         res.status(200).json({
@@ -66,10 +89,10 @@ const login = async (req, res) => {
                 email: user.email,
                 id: user._id
             }
-
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[Auth Login Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -89,9 +112,10 @@ const getMe = (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[Auth getMe Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
-}
+};
 
 const logout = async (req, res) => {
     try {
@@ -99,7 +123,8 @@ const logout = async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             expires: new Date(0),
-            sameSite: 'strict'
+            sameSite: 'strict',
+            path: '/'
         });
 
         res.status(200).json({
@@ -107,7 +132,8 @@ const logout = async (req, res) => {
             message: 'User logged out successfully'
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[Auth Logout Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
 };
 

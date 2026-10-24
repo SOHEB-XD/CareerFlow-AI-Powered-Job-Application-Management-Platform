@@ -221,7 +221,8 @@ const Landing = () => {
           {shouldReduceMotion ? (
             <img
               src="/videos/careerflow-spiral-poster.jpg"
-              alt="Silk spiral visual"
+              alt=""
+              aria-hidden="true"
               className="cf-hero-bg-media"
             />
           ) : (
@@ -465,9 +466,9 @@ const Landing = () => {
               {/* Left Column: Editorial Hierarchy & 3-Step Sequence */}
               <div className="cf-ai-spotlight-copy">
                 <span className="cf-ai-eyebrow">AI Email Studio</span>
-                <h3 className="cf-ai-headline">
+                <h2 className="cf-ai-headline">
                   Make every email count.
-                </h3>
+                </h2>
                 <p className="cf-ai-subcopy">
                   Research the company, choose the resume that fits the role, and create a tailored email without starting from a blank page.
                 </p>
@@ -477,7 +478,7 @@ const Landing = () => {
                     <div key={step.num} className="cf-ai-step-row">
                       <span className="cf-ai-step-index">{step.num}</span>
                       <div className="cf-ai-step-body">
-                        <h4 className="cf-ai-step-heading">{step.title}</h4>
+                        <h3 className="cf-ai-step-heading">{step.title}</h3>
                         <p className="cf-ai-step-text">{step.desc}</p>
                       </div>
                     </div>

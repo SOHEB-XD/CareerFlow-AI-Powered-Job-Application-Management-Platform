@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { getDashboardStats, getRecentApplications } = require('../controllers/dashboard.contoller');
 const { protect } = require('../middlewares/auth.middleware');
+const { aiLimiter, uploadLimiter } = require('../middlewares/rateLimiter.middleware');
 const { getFollowUpEmail } = require('../features/followUpEmailAI.feature');
 const {
     getResumeList,
@@ -32,7 +33,7 @@ router.get('/dashboard/recent', protect, getRecentApplications);
 /**
  * Follow Up Email AI feature API
  */
-router.get('/follow-up-email/:id', protect, getFollowUpEmail);
+router.get('/follow-up-email/:id', protect, aiLimiter, getFollowUpEmail);
 
 /**
  * Resume Library feature API
@@ -41,7 +42,7 @@ router.get('/resume', protect, getResumeList);
 router.get('/resume/current', protect, getCurrentResume);
 router.get('/resume/:id', protect, getResumeById);
 router.get('/resume/:id/download', protect, downloadResumeFile);
-router.post('/resume/upload', protect, uploadResume);
+router.post('/resume/upload', protect, uploadLimiter, uploadResume);
 router.patch('/resume/:id/current', protect, setCurrentResume);
 router.patch('/resume/:id/note', protect, updateResumeNote);
 router.delete('/resume/:id', protect, deleteResume);
@@ -49,7 +50,7 @@ router.delete('/resume/:id', protect, deleteResume);
 /**
  * Target Company feature API
  */
-router.post('/target-company/preview', protect, getTargetCompanyPreview);
+router.post('/target-company/preview', protect, aiLimiter, getTargetCompanyPreview);
 router.post('/target-company/:id/get-gmail-link', protect, getGmailLink);
 router.patch('/target-company/:id/mark-sent', protect, markSend);
 
@@ -64,7 +65,7 @@ router.get('/draft-application-emails', protect, getDraftApplicationEmails);
  */
 router.get('/communications', protect, getCommunications);
 router.get('/communications/drafts', protect, getStudioDrafts);
-router.post('/communications/generate', protect, generateStudioEmail);
+router.post('/communications/generate', protect, aiLimiter, generateStudioEmail);
 router.put('/communications/:id/draft', protect, updateStudioDraft);
 router.get('/communications/:id/gmail-link', protect, getStudioGmailLink);
 

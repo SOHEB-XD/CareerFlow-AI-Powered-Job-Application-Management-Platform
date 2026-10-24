@@ -74,8 +74,8 @@ const resumeSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// Compound index for fast per-user version lookups
-resumeSchema.index({ user: 1, version: -1 });
+// Unique compound index ensuring version integrity per user
+resumeSchema.index({ user: 1, version: 1 }, { unique: true });
 
 const Resume = mongoose.model('Resume', resumeSchema);
 

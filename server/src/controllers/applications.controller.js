@@ -46,7 +46,11 @@ const addApplication = async (req, res) => {
             data: application
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
+        console.error('[Applications addApplication Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -55,8 +59,8 @@ const getAllApplication = async (req, res) => {
         const user = req.user;
         const { page = 1, limit = 5, search, status } = req.query;
 
-        const pageNumber = parseInt(page);
-        const limitNumber = parseInt(limit);
+        const pageNumber = Math.max(parseInt(page) || 1, 1);
+        const limitNumber = Math.min(Math.max(parseInt(limit) || 5, 1), 100);
 
         const skip = (pageNumber - 1) * limitNumber;
 
@@ -64,28 +68,29 @@ const getAllApplication = async (req, res) => {
             user: user._id
         };
 
-        if (search) {
-            filter.$or = [
-                {
-                    companyName: {
-                        $regex: search,
-                        $options: "i"
+        if (search && typeof search === 'string') {
+            const sanitizedSearch = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            if (sanitizedSearch) {
+                filter.$or = [
+                    {
+                        companyName: {
+                            $regex: sanitizedSearch,
+                            $options: "i"
+                        }
+                    },
+                    {
+                        role: {
+                            $regex: sanitizedSearch,
+                            $options: "i"
+                        }
                     }
-                },
-                {
-                    role: {
-                        $regex: search,
-                        $options: "i"
-                    }
-                }
-            ];
+                ];
+            }
         }
 
-        if (status) {
+        if (status && typeof status === 'string') {
             filter.status = status;
         }
-
-
 
         const applications = await Application.find(filter).skip(skip).limit(limitNumber);
 
@@ -95,7 +100,8 @@ const getAllApplication = async (req, res) => {
             data: applications
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[Applications getAllApplication Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -120,7 +126,11 @@ const getApplicationById = async (req, res) => {
             data: application
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        if (error.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid application ID' });
+        }
+        console.error('[Applications getApplicationById Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -210,7 +220,8 @@ const updateApplication = async (req, res) => {
         if (error.name === 'CastError' || error.name === 'ValidationError') {
             return res.status(400).json({ message: error.message });
         }
-        res.status(500).json({ message: error.message });
+        console.error('[Applications updateApplication Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
 
 };
@@ -240,7 +251,8 @@ const deleteApplication = async (req, res) => {
         if (error.name === 'CastError') {
             return res.status(400).json({ message: 'Invalid application ID' });
         }
-        res.status(500).json({ message: error.message });
+        console.error('[Applications deleteApplication Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -271,7 +283,8 @@ const updateNoResponseStatus = async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[Applications updateNoResponseStatus Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
 };
 
@@ -301,7 +314,8 @@ const getUpcomingInterviews = async (req, res) => {
             data: applications
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[Applications getUpcomingInterviews Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
 };
 module.exports = { addApplication, getAllApplication, getApplicationById, updateApplication, deleteApplication, updateNoResponseStatus, getUpcomingInterviews };

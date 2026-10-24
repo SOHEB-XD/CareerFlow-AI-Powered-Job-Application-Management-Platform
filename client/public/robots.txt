@@ -1,0 +1,10 @@
+# CareerFlow Robots Configuration
+# Allow search engines to crawl public landing page and static assets
+User-agent: *
+Allow: /
+Allow: /assets/
+Allow: /videos/
+Allow: /favicon.svg
+
+# Disallow direct crawling of backend API routes
+Disallow: /api/

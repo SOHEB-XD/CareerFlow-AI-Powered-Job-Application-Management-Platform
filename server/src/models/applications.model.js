@@ -51,7 +51,7 @@ const applicationSchema = new mongoose.Schema({
     },
     notes: {
         type: String,
-        maxlenght: 1500,
+        maxlength: 1500,
         default: ''
     },
     interviewDate: {
@@ -64,6 +64,11 @@ const applicationSchema = new mongoose.Schema({
         required: true
     }
 }, { timestamps: true });
+
+// User-scoped compound indexes matching query patterns
+applicationSchema.index({ user: 1, status: 1 });
+applicationSchema.index({ user: 1, normalizedCompany: 1, normalizedRole: 1 });
+applicationSchema.index({ user: 1, appliedDate: -1 });
 
 const Application = mongoose.model('Application', applicationSchema);
 

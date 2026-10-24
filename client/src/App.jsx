@@ -10,6 +10,8 @@ import Resume from './pages/Resume';
 import Communications from './pages/Communications';
 import Landing from './pages/Landing';
 
+import RouteMetadata from './components/RouteMetadata';
+
 // Generic placeholder for future protected routes
 const Placeholder = ({ title }) => (
   <div className="content-container" style={{ padding: '2rem', background: '#FFFFFF', border: '1px solid #000000' }}>
@@ -22,6 +24,7 @@ const App = () => {
   return (
     <AuthProvider>
       <Router>
+        <RouteMetadata />
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Landing />} />
