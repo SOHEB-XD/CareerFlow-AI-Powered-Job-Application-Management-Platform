@@ -4,10 +4,10 @@
  * against brute-force, denial-of-service, and resource exhaustion attacks.
  *
  * NOTE ON TRUST PROXY:
- * Express 'trust proxy' is deliberately NOT enabled globally here because the application
- * is not yet deployed to a specific cloud provider/reverse proxy. In production behind
- * a reverse proxy (e.g., Cloudflare, AWS ALB, Nginx, Render), 'trust proxy' must be set
- * to the specific proxy hop count or CIDR range in server.js to ensure accurate client IP resolution.
+ * Express 'trust proxy' is configured in app.js for production deployment behind Render's
+ * single reverse proxy hop (app.set('trust proxy', 1)). This ensures express-rate-limit accurately
+ * identifies the client's public IP from the trusted proxy hop rather than pooling all traffic
+ * under Render's internal gateway IP, while rejecting forged upstream hops.
  *
  * NOTE ON SCALING:
  * For multi-instance/horizontal scaling, a distributed memory store (such as Redis with

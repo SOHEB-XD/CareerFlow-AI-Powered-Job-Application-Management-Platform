@@ -2,6 +2,36 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user.model');
 const jwt = require('jsonwebtoken');
 
+/**
+ * Common cookie options for authentication session tokens.
+ *
+ * POLICY & TOPOLOGY:
+ * For the initial deployment using separate frontend (Static Site) and backend (Web Service)
+ * Render hostnames (e.g. careerflow-web.onrender.com and careerflow-api.onrender.com),
+ * requests between the two are cross-site. Under HTTPS, SameSite=None combined with
+ * Secure=true is required so that the browser transmits the HTTP-only cookie on cross-site
+ * credentialed requests (withCredentials: true).
+ *
+ * NOTE ON THIRD-PARTY COOKIE RESTRICTIONS:
+ * SameSite=None permits cross-site transmission where supported, but does NOT bypass
+ * browsers, extensions, or incognito modes that aggressively block third-party cookies entirely.
+ *
+ * CUSTOM DOMAIN REASSESSMENT:
+ * Once the frontend and backend are migrated under a unified custom apex domain (e.g.,
+ * app.yourdomain.com and api.yourdomain.com), this policy should be reassessed and preferably
+ * transitioned to an appropriate same-site policy (such as SameSite=Lax or SameSite=Strict
+ * with a common parent domain) to minimize cross-site exposure.
+ *
+ * In local development (NODE_ENV !== 'production'), SameSite=Strict and Secure=false are
+ * preserved for standard HTTP localhost operation.
+ */
+const getAuthCookieOptions = () => ({
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+    path: '/'
+});
+
 const register = async (req, res) => {
     try {
         const { name, email, password } = req.body || {};
@@ -25,11 +55,8 @@ const register = async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
         res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours
-            sameSite: 'strict',
-            path: '/'
+            ...getAuthCookieOptions(),
+            maxAge: 24 * 60 * 60 * 1000 // 24 hours
         });
 
         res.status(201).json({
@@ -74,11 +101,8 @@ const login = async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
         res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours
-            sameSite: 'strict',
-            path: '/'
+            ...getAuthCookieOptions(),
+            maxAge: 24 * 60 * 60 * 1000 // 24 hours
         });
 
         res.status(200).json({
@@ -120,11 +144,8 @@ const getMe = (req, res) => {
 const logout = async (req, res) => {
     try {
         res.cookie('token', '', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            expires: new Date(0),
-            sameSite: 'strict',
-            path: '/'
+            ...getAuthCookieOptions(),
+            expires: new Date(0)
         });
 
         res.status(200).json({

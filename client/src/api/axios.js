@@ -1,9 +1,10 @@
 import axios from 'axios';
 
 // Create a centralized Axios instance.
-// Using relative URL because Vite proxies /api to the backend.
+// In local development, defaults to relative '/api' proxied by Vite to http://localhost:3000.
+// In production, uses import.meta.env.VITE_API_URL (e.g., https://your-backend.onrender.com/api).
 const api = axios.create({
-    baseURL: '/api',
+    baseURL: import.meta.env.VITE_API_URL || '/api',
     // Important: required to send and receive the HTTP-only cookie containing the JWT.
     withCredentials: true,
     headers: {
