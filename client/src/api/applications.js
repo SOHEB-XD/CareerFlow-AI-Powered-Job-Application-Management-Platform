@@ -41,3 +41,10 @@ export const deleteApplication = (id) => {
 export const updateNoResponse = () => {
   return api.put('/applications/update-no-response');
 };
+
+/**
+ * Fetch distinct cities for the authenticated user
+ */
+export const getUserCities = () => {
+  return api.get('/applications/get-user-cities');
+};

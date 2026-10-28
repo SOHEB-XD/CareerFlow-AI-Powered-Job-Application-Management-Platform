@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const addApplication = async (req, res) => {
     try {
-        let { companyName, role, applicationSource, appliedDate, companyWebsite, hrEmail, notes } = req.body;
+        let { companyName, role, applicationSource, appliedDate, companyWebsite, hrEmail, notes, city } = req.body;
         const user = req.user;
 
         if (
@@ -33,6 +33,7 @@ const addApplication = async (req, res) => {
             companyWebsite: typeof companyWebsite === 'string' ? companyWebsite.trim() : '',
             hrEmail: typeof hrEmail === 'string' ? hrEmail.trim() : '',
             notes: typeof notes === 'string' ? notes.trim() : '',
+            city: typeof city === 'string' ? city.trim() : '',
             user: user._id
         });
 
@@ -57,7 +58,7 @@ const addApplication = async (req, res) => {
 const getAllApplication = async (req, res) => {
     try {
         const user = req.user;
-        const { page = 1, limit = 5, search, status } = req.query;
+        const { page = 1, limit = 5, search, status, fromDate, toDate, startDate, endDate, date, appliedDate, city } = req.query;
 
         const pageNumber = Math.max(parseInt(page) || 1, 1);
         const limitNumber = Math.min(Math.max(parseInt(limit) || 5, 1), 100);
@@ -92,12 +93,98 @@ const getAllApplication = async (req, res) => {
             filter.status = status;
         }
 
-        const applications = await Application.find(filter).skip(skip).limit(limitNumber);
+        if (city && typeof city === 'string') {
+            const trimmedCity = city.trim();
+            if (trimmedCity && trimmedCity !== 'All' && trimmedCity !== 'All cities') {
+                const sanitizedCity = trimmedCity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                filter.city = { $regex: `^${sanitizedCity}$`, $options: 'i' };
+            }
+        }
+
+        // Helper to parse date boundaries safely with calendar component validation
+        const parseDateBoundary = (val, isEnd = false) => {
+            if (!val || typeof val !== 'string') return null;
+            const trimmed = val.trim();
+            if (!trimmed) return null;
+
+            if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+                const [y, m, d] = trimmed.split('-').map(Number);
+                const dateObj = new Date(Date.UTC(y, m - 1, d, isEnd ? 23 : 0, isEnd ? 59 : 0, isEnd ? 59 : 0, isEnd ? 999 : 0));
+                if (dateObj.getUTCFullYear() !== y || dateObj.getUTCMonth() !== m - 1 || dateObj.getUTCDate() !== d) {
+                    return { error: true };
+                }
+                return { date: dateObj };
+            }
+
+            const dateObj = new Date(trimmed);
+            if (isNaN(dateObj.getTime())) {
+                return { error: true };
+            }
+            if (isEnd) {
+                dateObj.setUTCHours(23, 59, 59, 999);
+            } else {
+                dateObj.setUTCHours(0, 0, 0, 0);
+            }
+            return { date: dateObj };
+        };
+
+        const targetSingleDate = date || appliedDate;
+        const rawFrom = targetSingleDate || fromDate || startDate;
+        const rawTo = targetSingleDate || toDate || endDate;
+
+        let parsedFrom = null;
+        let parsedTo = null;
+
+        if (rawFrom !== undefined && rawFrom !== '') {
+            const result = parseDateBoundary(rawFrom, false);
+            if (!result || result.error) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid fromDate format. Expected YYYY-MM-DD or valid date string.'
+                });
+            }
+            parsedFrom = result.date;
+        }
+
+        if (rawTo !== undefined && rawTo !== '') {
+            const result = parseDateBoundary(rawTo, true);
+            if (!result || result.error) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid toDate format. Expected YYYY-MM-DD or valid date string.'
+                });
+            }
+            parsedTo = result.date;
+        }
+
+        if (parsedFrom && parsedTo && parsedFrom > parsedTo) {
+            return res.status(400).json({
+                success: false,
+                message: 'fromDate cannot be later than toDate'
+            });
+        }
+
+        if (parsedFrom || parsedTo) {
+            filter.appliedDate = {};
+            if (parsedFrom) filter.appliedDate.$gte = parsedFrom;
+            if (parsedTo) filter.appliedDate.$lte = parsedTo;
+        }
+
+        const [applications, total] = await Promise.all([
+            Application.find(filter).skip(skip).limit(limitNumber),
+            Application.countDocuments(filter)
+        ]);
+
+        const totalPages = Math.ceil(total / limitNumber);
 
         res.status(200).json({
             success: true,
             message: 'Applications fetched successfully',
-            data: applications
+            data: applications,
+            total,
+            totalPages,
+            page: pageNumber,
+            limit: limitNumber
         });
     } catch (error) {
         console.error('[Applications getAllApplication Error]:', error.message);
@@ -138,7 +225,7 @@ const updateApplication = async (req, res) => {
     try {
         const user = req.user;
         const { id } = req.params;
-        const { companyName, role, status, applicationSource, appliedDate, companyWebsite, hrEmail, notes, interviewDate } = req.body || {};
+        const { companyName, role, status, applicationSource, appliedDate, companyWebsite, hrEmail, notes, interviewDate, city } = req.body || {};
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: 'Invalid application ID' });
@@ -201,6 +288,9 @@ const updateApplication = async (req, res) => {
         if (companyWebsite !== undefined) updateData.companyWebsite = typeof companyWebsite === 'string' ? companyWebsite.trim() : '';
         if (hrEmail !== undefined) updateData.hrEmail = typeof hrEmail === 'string' ? hrEmail.trim() : '';
         if (notes !== undefined) updateData.notes = typeof notes === 'string' ? notes.trim() : '';
+        if (city !== undefined) {
+            updateData.city = typeof city === 'string' ? city.trim() : '';
+        }
         if (interviewStatuses.includes(targetStatus) && interviewDate !== undefined) {
             updateData.interviewDate = interviewDate;
         }
@@ -318,4 +408,50 @@ const getUpcomingInterviews = async (req, res) => {
         res.status(500).json({ message: 'An unexpected internal error occurred' });
     }
 };
-module.exports = { addApplication, getAllApplication, getApplicationById, updateApplication, deleteApplication, updateNoResponseStatus, getUpcomingInterviews };
+
+const getUserCities = async (req, res) => {
+    try {
+        const user = req.user;
+        const rawCities = await Application.distinct('city', {
+            user: user._id,
+            city: { $nin: [null, '', undefined] }
+        });
+
+        const cityMap = new Map();
+        for (const c of rawCities) {
+            if (typeof c === 'string') {
+                const trimmed = c.trim();
+                if (trimmed) {
+                    const lower = trimmed.toLowerCase();
+                    if (!cityMap.has(lower)) {
+                        cityMap.set(lower, trimmed);
+                    }
+                }
+            }
+        }
+
+        const distinctCities = Array.from(cityMap.values()).sort((a, b) =>
+            a.localeCompare(b, undefined, { sensitivity: 'base' })
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'User cities fetched successfully',
+            data: distinctCities
+        });
+    } catch (error) {
+        console.error('[Applications getUserCities Error]:', error.message);
+        res.status(500).json({ message: 'An unexpected internal error occurred' });
+    }
+};
+
+module.exports = {
+    addApplication,
+    getAllApplication,
+    getApplicationById,
+    updateApplication,
+    deleteApplication,
+    updateNoResponseStatus,
+    getUpcomingInterviews,
+    getUserCities
+};

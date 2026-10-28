@@ -30,6 +30,13 @@
   --accent: #0000FF;
   --accent-hover: #0000FF;
 
+  /* Global Scrollbar Design Tokens */
+  --scrollbar-size: 7px;
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(0, 0, 0, 0.22);
+  --scrollbar-thumb-hover: #0000FF;
+  --scrollbar-thumb-active: #0000CC;
+
   /* Typography Scale */
   --font-display: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -74,6 +81,69 @@ body {
   background-color: var(--bg-page);
   color: var(--text-primary);
   font-family: var(--font-sans);
+}
+
+/* =============================================================================
+   CAREERFLOW GLOBAL SCROLLBAR SYSTEM
+   Modern, slim, accessible scrollbars matching CareerFlow's visual identity.
+   Pure white workspaces, black typography, and restrained electric-blue (#0000FF) accents.
+   Supports standards-based properties (scrollbar-width, scrollbar-color) and WebKit.
+   ============================================================================= */
+
+/* Standards-based scrollbar styling (Firefox 64+, modern engines) */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* WebKit & Chromium custom scrollbars (Chrome, Edge, Safari, Opera, WebViews) */
+::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+}
+
+::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: var(--radius-full);
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.15s ease;
+}
+
+::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-thumb:active,
+*::-webkit-scrollbar-thumb:active {
+  background-color: var(--scrollbar-thumb-active);
+}
+
+/* Remove chunky default browser arrow buttons */
+::-webkit-scrollbar-button,
+*::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Clear corner junction where horizontal and vertical scrollbars meet */
+::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* Typography Classes */

@@ -54,6 +54,12 @@ const applicationSchema = new mongoose.Schema({
         maxlength: 1500,
         default: ''
     },
+    city: {
+        type: String,
+        trim: true,
+        maxlength: 100,
+        default: ''
+    },
     interviewDate: {
         type: Date,
         default: null
@@ -69,6 +75,7 @@ const applicationSchema = new mongoose.Schema({
 applicationSchema.index({ user: 1, status: 1 });
 applicationSchema.index({ user: 1, normalizedCompany: 1, normalizedRole: 1 });
 applicationSchema.index({ user: 1, appliedDate: -1 });
+applicationSchema.index({ user: 1, city: 1 });
 
 const Application = mongoose.model('Application', applicationSchema);
 

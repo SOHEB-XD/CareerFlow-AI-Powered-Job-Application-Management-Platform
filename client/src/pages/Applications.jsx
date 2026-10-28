@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Plus, 
   Search, 
@@ -14,14 +14,19 @@ import {
   Clock,
   CalendarDays,
   ChevronDown,
-  Loader2
+  Loader2,
+  MapPin,
+  Eye,
+  Globe,
+  Mail
 } from 'lucide-react';
 import { 
   getApplications, 
   addApplication, 
   updateApplication, 
   deleteApplication, 
-  updateNoResponse 
+  updateNoResponse,
+  getUserCities
 } from '../api/applications';
 import './Applications.css';
 
@@ -48,6 +53,20 @@ const COMMON_SOURCES = [
   'Recruiter Outreach',
   'Other'
 ];
+
+// Pagination window helper (compact, accessible, handles ellipsis gracefully)
+const getPageNumbers = (current, total) => {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  if (current <= 4) {
+    return [1, 2, 3, 4, 5, '...', total];
+  }
+  if (current >= total - 3) {
+    return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+  }
+  return [1, '...', current - 1, current, current + 1, '...', total];
+};
 
 // Date formatters
 const formatDate = (dateStr) => {
@@ -104,6 +123,21 @@ const getStatusBadgeClass = (status) => {
   }
 };
 
+// Helper to format YYYY-MM-DD into readable date (e.g., '28 Oct 2026')
+const formatDisplayDate = (dateStr) => {
+  if (!dateStr || typeof dateStr !== 'string') return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  if (!y || !m || !d) return dateStr;
+  const dateObj = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+  if (isNaN(dateObj.getTime())) return dateStr;
+  return dateObj.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC'
+  });
+};
+
 const Applications = () => {
   // Collection state
   const [applications, setApplications] = useState([]);
@@ -115,10 +149,35 @@ const Applications = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [appliedDateFilter, setAppliedDateFilter] = useState('');
+  const [cityFilter, setCityFilter] = useState('All');
+  const [availableCities, setAvailableCities] = useState([]);
   const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const limit = 10;
 
+  const dateInputRef = useRef(null);
+
+  const handleTriggerClick = () => {
+    if (dateInputRef.current) {
+      if (typeof dateInputRef.current.showPicker === 'function') {
+        try {
+          dateInputRef.current.showPicker();
+          return;
+        } catch {
+          // Fall back to focus
+        }
+      }
+      dateInputRef.current.focus();
+    }
+  };
+
+  const totalPages = Math.ceil(totalCount / limit);
+  const startRecord = totalCount === 0 ? 0 : (page - 1) * limit + 1;
+  const endRecord = Math.min(page * limit, totalCount);
+
   // Modals state
+  const [viewingApp, setViewingApp] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingApp, setEditingApp] = useState(null);
   const [deletingApp, setDeletingApp] = useState(null);
@@ -131,7 +190,8 @@ const Applications = () => {
     appliedDate: new Date().toISOString().split('T')[0],
     companyWebsite: '',
     hrEmail: '',
-    notes: ''
+    notes: '',
+    city: ''
   });
   const [createFormErrors, setCreateFormErrors] = useState({});
   const [isCreating, setIsCreating] = useState(false);
@@ -149,6 +209,26 @@ const Applications = () => {
   const [updatingStatusId, setUpdatingStatusId] = useState(null);
   const [datePrompt, setDatePrompt] = useState(null);
   const [datePromptError, setDatePromptError] = useState('');
+
+  // Escape key and body scroll lock for View Modal
+  useEffect(() => {
+    if (!viewingApp) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setViewingApp(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [viewingApp]);
 
   // Auto-dismiss toasts
   useEffect(() => {
@@ -173,17 +253,60 @@ const Applications = () => {
     setReloadToken((t) => t + 1);
   }, []);
 
+  // Load user's distinct cities across all applications
+  const loadUserCities = useCallback(() => {
+    getUserCities()
+      .then(({ data }) => {
+        if (data?.success && Array.isArray(data.data)) {
+          setAvailableCities(data.data);
+        }
+      })
+      .catch(() => {
+        // Silently preserve empty cities array if not loaded
+      });
+  }, []);
+
+  useEffect(() => {
+    loadUserCities();
+  }, [loadUserCities, reloadToken]);
+
   useEffect(() => {
     let isCancelled = false;
 
     const params = { page, limit };
     if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
     if (statusFilter && statusFilter !== 'All') params.status = statusFilter;
+    if (appliedDateFilter) {
+      // Reusing range implementation with same day lower/upper boundaries
+      params.fromDate = appliedDateFilter;
+      params.toDate = appliedDateFilter;
+      params.date = appliedDateFilter;
+    }
+    if (cityFilter && cityFilter !== 'All') {
+      params.city = cityFilter;
+    }
 
     getApplications(params)
       .then(({ data }) => {
         if (!isCancelled && data?.success) {
-          setApplications(data.data || []);
+          const items = data.data || [];
+          setApplications(items);
+
+          // Read actual total count from backend response
+          const realTotal = typeof data.total === 'number'
+            ? data.total
+            : (typeof data.pagination?.total === 'number' ? data.pagination.total : items.length);
+
+          setTotalCount(realTotal);
+
+          // Gracefully adjust page if current page became invalid (e.g. deletions or filter mutations)
+          const calcPages = Math.ceil(realTotal / limit);
+          if (calcPages > 0 && page > calcPages) {
+            setPage(calcPages);
+          } else if (calcPages === 0 && page > 1) {
+            setPage(1);
+          }
+
           setError(null);
         }
       })
@@ -201,7 +324,7 @@ const Applications = () => {
     return () => {
       isCancelled = true;
     };
-  }, [page, limit, debouncedSearch, statusFilter, reloadToken]);
+  }, [page, limit, debouncedSearch, statusFilter, appliedDateFilter, cityFilter, reloadToken]);
 
   // ── Handlers: Status Filter ──
   const handleStatusFilterChange = (status) => {
@@ -209,10 +332,29 @@ const Applications = () => {
     setPage(1);
   };
 
+  // ── Handlers: Date Filter ──
+  const handleDateChange = (val) => {
+    setAppliedDateFilter(val);
+    setPage(1);
+  };
+
+  const handleClearDateFilter = () => {
+    setAppliedDateFilter('');
+    setPage(1);
+  };
+
+  // ── Handlers: City Filter ──
+  const handleCityFilterChange = (val) => {
+    setCityFilter(val);
+    setPage(1);
+  };
+
   const handleClearFilters = () => {
     setSearchQuery('');
     setDebouncedSearch('');
     setStatusFilter('All');
+    setAppliedDateFilter('');
+    setCityFilter('All');
     setPage(1);
   };
 
@@ -237,6 +379,14 @@ const Applications = () => {
           type: 'success',
           text: `Updated status for ${app.companyName} to "${newStatus}"`
         });
+        // If an active status filter was in place and the item no longer matches, refresh pagination
+        if (statusFilter !== 'All' && newStatus !== statusFilter) {
+          if (applications.length === 1 && page > 1) {
+            setPage((p) => Math.max(1, p - 1));
+          } else {
+            fetchApplications();
+          }
+        }
         return true;
       }
       return false;
@@ -320,7 +470,8 @@ const Applications = () => {
       appliedDate: new Date().toISOString().split('T')[0],
       companyWebsite: '',
       hrEmail: '',
-      notes: ''
+      notes: '',
+      city: ''
     });
     setCreateFormErrors({});
     setCreateApiError('');
@@ -350,7 +501,8 @@ const Applications = () => {
         appliedDate: createForm.appliedDate || undefined,
         companyWebsite: createForm.companyWebsite.trim(),
         hrEmail: createForm.hrEmail.trim(),
-        notes: createForm.notes.trim()
+        notes: createForm.notes.trim(),
+        city: createForm.city ? createForm.city.trim() : ''
       };
 
       await addApplication(payload);
@@ -377,7 +529,8 @@ const Applications = () => {
       interviewDate: isInterview ? toInputDate(app.interviewDate) : '',
       companyWebsite: app.companyWebsite || '',
       hrEmail: app.hrEmail || '',
-      notes: app.notes || ''
+      notes: app.notes || '',
+      city: app.city || ''
     });
     setEditFormErrors({});
     setEditApiError('');
@@ -413,7 +566,8 @@ const Applications = () => {
         appliedDate: editForm.appliedDate || undefined,
         companyWebsite: editForm.companyWebsite.trim(),
         hrEmail: editForm.hrEmail.trim(),
-        notes: editForm.notes.trim()
+        notes: editForm.notes.trim(),
+        city: typeof editForm.city === 'string' ? editForm.city.trim() : ''
       };
 
       if (isInterview && editForm.interviewDate) {
@@ -449,7 +603,12 @@ const Applications = () => {
       const deletedName = `${deletingApp.role} at ${deletingApp.companyName}`;
       setDeletingApp(null);
       setToast({ type: 'success', text: `Deleted application for ${deletedName}` });
-      fetchApplications();
+      // If deleting the only remaining item on a page > 1, retreat to previous page
+      if (applications.length === 1 && page > 1) {
+        setPage((p) => Math.max(1, p - 1));
+      } else {
+        fetchApplications();
+      }
     } catch (err) {
       setDeleteApiError(err.response?.data?.message || 'Failed to delete application. Please try again.');
     } finally {
@@ -552,7 +711,70 @@ const Applications = () => {
             )}
           </div>
 
-          {(debouncedSearch || statusFilter !== 'All') && (
+          {/* Applied Date Filter */}
+          <div className="date-filter-control" role="group" aria-label="Filter applications by applied date">
+            <button
+              type="button"
+              className={`date-filter-trigger${appliedDateFilter ? ' has-value' : ''}`}
+              onClick={handleTriggerClick}
+              aria-label={appliedDateFilter ? `Applied date: ${formatDisplayDate(appliedDateFilter)}. Click to change date.` : 'Applied date: Select date. Click to choose date.'}
+            >
+              <CalendarDays size={15} strokeWidth={2} className="date-filter-icon" aria-hidden="true" />
+              <span className="date-filter-label">Applied date</span>
+              <span className="date-filter-divider" aria-hidden="true">:</span>
+              <span className={`date-filter-value${!appliedDateFilter ? ' is-placeholder' : ''}`}>
+                {appliedDateFilter ? formatDisplayDate(appliedDateFilter) : 'Select date'}
+              </span>
+            </button>
+
+            <input
+              ref={dateInputRef}
+              id="filter-applied-date"
+              type="date"
+              className="date-picker-native-hidden"
+              value={appliedDateFilter}
+              onChange={(e) => handleDateChange(e.target.value)}
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+
+            {appliedDateFilter && (
+              <button 
+                type="button" 
+                className="date-clear-btn" 
+                onClick={handleClearDateFilter}
+                title="Clear applied date"
+                aria-label="Clear applied date filter"
+              >
+                <X size={13} strokeWidth={2.4} aria-hidden="true" />
+              </button>
+            )}
+          </div>
+
+          {/* City Filter */}
+          <div className="city-filter-control" role="group" aria-label="Filter applications by city">
+            <MapPin size={14} strokeWidth={2} className="city-filter-icon" aria-hidden="true" />
+            <label htmlFor="filter-city" className="city-filter-label">City</label>
+            <span className="city-filter-divider" aria-hidden="true">:</span>
+            <select
+              id="filter-city"
+              className="city-filter-select"
+              value={cityFilter}
+              onChange={(e) => handleCityFilterChange(e.target.value)}
+              aria-label="Filter applications by city"
+            >
+              <option value="All">All cities</option>
+              {availableCities.length === 0 ? (
+                <option value="" disabled>No cities available</option>
+              ) : (
+                availableCities.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))
+              )}
+            </select>
+          </div>
+
+          {(debouncedSearch || statusFilter !== 'All' || appliedDateFilter || (cityFilter && cityFilter !== 'All')) && (
             <button 
               type="button" 
               className="clear-filters-link" 
@@ -598,18 +820,18 @@ const Applications = () => {
           /* Empty States */
           <div className="applications-empty-state">
             <div className="empty-icon-wrap" aria-hidden="true">
-              {debouncedSearch || statusFilter !== 'All' ? (
+              {debouncedSearch || statusFilter !== 'All' || appliedDateFilter || (cityFilter && cityFilter !== 'All') ? (
                 <Search size={22} strokeWidth={1.8} />
               ) : (
                 <Briefcase size={22} strokeWidth={1.8} />
               )}
             </div>
 
-            {debouncedSearch || statusFilter !== 'All' ? (
+            {debouncedSearch || statusFilter !== 'All' || appliedDateFilter || (cityFilter && cityFilter !== 'All') ? (
               <>
                 <h2 className="empty-state-title">No matching applications</h2>
                 <p className="empty-state-desc">
-                  No applications matched your current search or filter criteria. Try resetting them to see all records.
+                  No applications matched your current search or date/status/city filter criteria. Try resetting them to see all records.
                 </p>
                 <button 
                   type="button" 
@@ -674,6 +896,12 @@ const Applications = () => {
                               </a>
                             ) : (
                               <span className="company-name-text">{app.companyName}</span>
+                            )}
+                            {app.city && (
+                              <span className="company-city-subtext">
+                                <MapPin size={10} strokeWidth={2} aria-hidden="true" />
+                                <span>{app.city}</span>
+                              </span>
                             )}
                             {app.hrEmail && (
                               <span className="company-subtext">{app.hrEmail}</span>
@@ -747,6 +975,15 @@ const Applications = () => {
                           <button
                             type="button"
                             className="action-btn"
+                            onClick={() => setViewingApp(app)}
+                            title={`View details for ${app.companyName} (${app.role})`}
+                            aria-label={`View details for ${app.companyName} (${app.role})`}
+                          >
+                            <Eye size={14} strokeWidth={1.8} />
+                          </button>
+                          <button
+                            type="button"
+                            className="action-btn"
                             onClick={() => handleOpenEditModal(app)}
                             title={`Edit ${app.companyName} application`}
                             aria-label={`Edit ${app.companyName} application`}
@@ -782,6 +1019,12 @@ const Applications = () => {
                       <div className="mobile-card-title-group">
                         <h3 className="mobile-card-company">{app.companyName}</h3>
                         <p className="mobile-card-role">{app.role}</p>
+                        {app.city && (
+                          <span className="mobile-city-tag">
+                            <MapPin size={10} strokeWidth={2} aria-hidden="true" />
+                            <span>{app.city}</span>
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -841,7 +1084,17 @@ const Applications = () => {
                     <button
                       type="button"
                       className="btn-secondary mobile-action-btn"
+                      onClick={() => setViewingApp(app)}
+                      aria-label={`View details for ${app.companyName} (${app.role})`}
+                    >
+                      <Eye size={13} strokeWidth={1.8} />
+                      <span>View</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-secondary mobile-action-btn"
                       onClick={() => handleOpenEditModal(app)}
+                      aria-label={`Edit ${app.companyName} (${app.role})`}
                     >
                       <Pencil size={13} strokeWidth={1.8} />
                       <span>Edit</span>
@@ -850,6 +1103,7 @@ const Applications = () => {
                       type="button"
                       className="btn-secondary mobile-action-btn delete-action"
                       onClick={() => handleOpenDeleteModal(app)}
+                      aria-label={`Delete ${app.companyName} (${app.role})`}
                     >
                       <Trash2 size={13} strokeWidth={1.8} />
                       <span>Delete</span>
@@ -862,31 +1116,67 @@ const Applications = () => {
             {/* ── Pagination Controls ── */}
             <footer className="applications-pagination">
               <span className="pagination-info">
-                Page {page} {applications.length > 0 && `(${applications.length} on this page)`}
+                {totalCount === 0 ? (
+                  'Showing 0 applications'
+                ) : (
+                  <>
+                    Showing <span className="pagination-range">{startRecord}–{endRecord}</span> of{' '}
+                    <span className="pagination-total">{totalCount}</span> {totalCount === 1 ? 'application' : 'applications'}
+                  </>
+                )}
               </span>
 
-              <div className="pagination-controls">
-                <button
-                  type="button"
-                  className="pagination-btn"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page <= 1 || isLoading}
-                  aria-label="Previous page"
-                >
-                  <ChevronLeft size={15} strokeWidth={2} />
-                  <span>Previous</span>
-                </button>
-                <button
-                  type="button"
-                  className="pagination-btn"
-                  onClick={() => setPage((p) => p + 1)}
-                  disabled={applications.length < limit || isLoading}
-                  aria-label="Next page"
-                >
-                  <span>Next</span>
-                  <ChevronRight size={15} strokeWidth={2} />
-                </button>
-              </div>
+              {totalPages > 1 && (
+                <div className="pagination-controls" role="navigation" aria-label="Pagination">
+                  <button
+                    type="button"
+                    className="pagination-btn pagination-prev-btn"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1 || isLoading}
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft size={15} strokeWidth={2} aria-hidden="true" />
+                    <span>Previous</span>
+                  </button>
+
+                  <div className="pagination-pages" aria-label="Page numbers">
+                    {getPageNumbers(page, totalPages).map((p, idx) => {
+                      if (p === '...') {
+                        return (
+                          <span key={`ellipsis-${idx}`} className="pagination-ellipsis" aria-hidden="true">
+                            …
+                          </span>
+                        );
+                      }
+                      const isCurrent = p === page;
+                      return (
+                        <button
+                          key={p}
+                          type="button"
+                          className={`pagination-page-btn${isCurrent ? ' active' : ''}`}
+                          onClick={() => setPage(p)}
+                          disabled={isLoading}
+                          aria-label={`Page ${p}`}
+                          aria-current={isCurrent ? 'page' : undefined}
+                        >
+                          {p}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="pagination-btn pagination-next-btn"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages || isLoading}
+                    aria-label="Next page"
+                  >
+                    <span>Next</span>
+                    <ChevronRight size={15} strokeWidth={2} aria-hidden="true" />
+                  </button>
+                </div>
+              )}
             </footer>
           </>
         )}
@@ -1001,14 +1291,14 @@ const Applications = () => {
 
                 <div className="form-grid-2">
                   <div className="modal-field">
-                    <label htmlFor="create-website">Company Website</label>
+                    <label htmlFor="create-city">City</label>
                     <input
-                      id="create-website"
-                      type="url"
+                      id="create-city"
+                      type="text"
                       className="modal-input"
-                      placeholder="https://company.com"
-                      value={createForm.companyWebsite}
-                      onChange={(e) => setCreateForm({ ...createForm, companyWebsite: e.target.value })}
+                      placeholder="e.g. Surat"
+                      value={createForm.city}
+                      onChange={(e) => setCreateForm({ ...createForm, city: e.target.value })}
                       disabled={isCreating}
                     />
                   </div>
@@ -1025,6 +1315,19 @@ const Applications = () => {
                       disabled={isCreating}
                     />
                   </div>
+                </div>
+
+                <div className="modal-field">
+                  <label htmlFor="create-website">Company Website</label>
+                  <input
+                    id="create-website"
+                    type="url"
+                    className="modal-input"
+                    placeholder="https://company.com"
+                    value={createForm.companyWebsite}
+                    onChange={(e) => setCreateForm({ ...createForm, companyWebsite: e.target.value })}
+                    disabled={isCreating}
+                  />
                 </div>
 
                 <div className="modal-field">
@@ -1235,16 +1538,31 @@ const Applications = () => {
                   </div>
                 </div>
 
-                <div className="modal-field">
-                  <label htmlFor="edit-website">Company Website</label>
-                  <input
-                    id="edit-website"
-                    type="url"
-                    className="modal-input"
-                    value={editForm.companyWebsite}
-                    onChange={(e) => setEditForm({ ...editForm, companyWebsite: e.target.value })}
-                    disabled={isUpdating}
-                  />
+                <div className="form-grid-2">
+                  <div className="modal-field">
+                    <label htmlFor="edit-city">City</label>
+                    <input
+                      id="edit-city"
+                      type="text"
+                      className="modal-input"
+                      placeholder="e.g. Surat"
+                      value={editForm.city}
+                      onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                      disabled={isUpdating}
+                    />
+                  </div>
+
+                  <div className="modal-field">
+                    <label htmlFor="edit-website">Company Website</label>
+                    <input
+                      id="edit-website"
+                      type="url"
+                      className="modal-input"
+                      value={editForm.companyWebsite}
+                      onChange={(e) => setEditForm({ ...editForm, companyWebsite: e.target.value })}
+                      disabled={isUpdating}
+                    />
+                  </div>
                 </div>
 
                 <div className="modal-field">
@@ -1429,6 +1747,189 @@ const Applications = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ═════════════════════════════════════════════════════════════════════════
+          APPLICATION DETAILS VIEW MODAL (READ-ONLY)
+          ═════════════════════════════════════════════════════════════════════════ */}
+      {viewingApp && (
+        <div className="modal-backdrop" onClick={() => setViewingApp(null)}>
+          <div 
+            className="modal-dialog modal-dialog-view"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="view-modal-title"
+          >
+            <div className="view-modal-header">
+              <div className="view-modal-brand">
+                <div className="company-avatar view-avatar" aria-hidden="true">
+                  {viewingApp.companyName?.charAt(0)?.toUpperCase() || 'C'}
+                </div>
+                <div className="view-modal-titles">
+                  <h2 id="view-modal-title" className="view-modal-company">
+                    {viewingApp.companyName}
+                  </h2>
+                  <p className="view-modal-role">{viewingApp.role}</p>
+                </div>
+              </div>
+
+              <div className="view-modal-header-right">
+                <span className={`status-pill active ${getStatusBadgeClass(viewingApp.status)} view-status-badge`}>
+                  {viewingApp.status}
+                </span>
+                <button 
+                  type="button" 
+                  className="modal-close-btn" 
+                  onClick={() => setViewingApp(null)}
+                  aria-label="Close details modal"
+                >
+                  <X size={16} strokeWidth={2} />
+                </button>
+              </div>
+            </div>
+
+            <div className="modal-body view-modal-body">
+              {/* Grid of Key Properties */}
+              <div className="view-details-grid">
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Status</span>
+                  <span className="view-detail-value">{viewingApp.status}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">City</span>
+                  <span className="view-detail-value">
+                    {viewingApp.city ? (
+                      <span className="view-inline-icon">
+                        <MapPin size={13} strokeWidth={2} className="view-icon-blue" aria-hidden="true" />
+                        <span>{viewingApp.city}</span>
+                      </span>
+                    ) : (
+                      <span className="view-detail-empty">Not provided</span>
+                    )}
+                  </span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Applied Date</span>
+                  <span className="view-detail-value">
+                    <span className="view-inline-icon">
+                      <CalendarDays size={13} strokeWidth={2} className="view-icon-blue" aria-hidden="true" />
+                      <span>{formatDate(viewingApp.appliedDate)}</span>
+                    </span>
+                  </span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Source</span>
+                  <span className="view-detail-value">
+                    {viewingApp.applicationSource || <span className="view-detail-empty">Not provided</span>}
+                  </span>
+                </div>
+
+                {viewingApp.interviewDate && (
+                  <div className="view-detail-card view-detail-card-highlight">
+                    <span className="view-detail-label">Interview Date & Time</span>
+                    <span className="view-detail-value">
+                      <span className="view-inline-icon">
+                        <Clock size={13} strokeWidth={2} className="view-icon-blue" aria-hidden="true" />
+                        <span>{formatInterviewDate(viewingApp.interviewDate)}</span>
+                      </span>
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Contact & Links Section */}
+              <div className="view-section">
+                <h3 className="view-section-heading">Contact & Links</h3>
+                <div className="view-links-grid">
+                  <div className="view-link-item">
+                    <span className="view-link-label">Company Website:</span>
+                    {viewingApp.companyWebsite ? (
+                      <a 
+                        href={viewingApp.companyWebsite.startsWith('http') ? viewingApp.companyWebsite : `https://${viewingApp.companyWebsite}`}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="view-external-link"
+                        title={`Visit ${viewingApp.companyWebsite}`}
+                      >
+                        <Globe size={13} strokeWidth={2} aria-hidden="true" />
+                        <span className="view-link-truncate">{viewingApp.companyWebsite}</span>
+                        <ExternalLink size={11} strokeWidth={2} aria-hidden="true" />
+                      </a>
+                    ) : (
+                      <span className="view-detail-empty">Not provided</span>
+                    )}
+                  </div>
+
+                  <div className="view-link-item">
+                    <span className="view-link-label">HR / Recruiter Email:</span>
+                    {viewingApp.hrEmail ? (
+                      <a 
+                        href={`mailto:${viewingApp.hrEmail}`}
+                        className="view-external-link"
+                        title={`Email ${viewingApp.hrEmail}`}
+                      >
+                        <Mail size={13} strokeWidth={2} aria-hidden="true" />
+                        <span className="view-link-truncate">{viewingApp.hrEmail}</span>
+                      </a>
+                    ) : (
+                      <span className="view-detail-empty">Not provided</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Notes & Job Details */}
+              <div className="view-section">
+                <h3 className="view-section-heading">Notes & Details</h3>
+                <div className="view-notes-box">
+                  {viewingApp.notes && viewingApp.notes.trim() ? (
+                    <p className="view-notes-text">{viewingApp.notes}</p>
+                  ) : (
+                    <p className="view-notes-empty">No additional notes or description recorded for this application.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Record Timestamps (Gracefully formatted without exposing raw DB identifiers) */}
+              {(viewingApp.createdAt || viewingApp.updatedAt) && (
+                <div className="view-timestamps-footer">
+                  {viewingApp.createdAt && (
+                    <span>Added: {formatDate(viewingApp.createdAt)}</span>
+                  )}
+                  {viewingApp.updatedAt && viewingApp.updatedAt !== viewingApp.createdAt && (
+                    <span>• Last updated: {formatDate(viewingApp.updatedAt)}</span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer view-modal-footer">
+              <button 
+                type="button" 
+                className="btn-secondary" 
+                onClick={() => setViewingApp(null)}
+              >
+                Close
+              </button>
+              <button 
+                type="button" 
+                className="btn-primary" 
+                onClick={() => {
+                  const appToEdit = viewingApp;
+                  setViewingApp(null);
+                  handleOpenEditModal(appToEdit);
+                }}
+              >
+                <Pencil size={14} strokeWidth={2} aria-hidden="true" />
+                <span>Edit Application</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
