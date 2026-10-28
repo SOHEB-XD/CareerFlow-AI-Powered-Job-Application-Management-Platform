@@ -40,7 +40,7 @@ const Register = () => {
     setIsSubmitting(true);
     try {
       await register(name.trim(), email.trim(), password);
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create account. Please try again.');
     } finally {

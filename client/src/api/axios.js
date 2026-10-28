@@ -17,8 +17,16 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
-            // The AuthContext will handle state updates, this is just a generic handler
-            // that could emit an event if needed, but for now we rely on the endpoints.
+            const url = error.config?.url || '';
+            const isAuthRoute =
+                url.includes('/auth/me') ||
+                url.includes('/auth/login') ||
+                url.includes('/auth/register');
+
+            // When a protected endpoint returns 401 mid-session, notify the app to reset auth state
+            if (!isAuthRoute && typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+            }
         }
         return Promise.reject(error);
     }

@@ -25,7 +25,9 @@ if (process.env.NODE_ENV === 'production') {
 app.use(helmet({ contentSecurityPolicy: false }));
 
 // 3. Explicit Credential-Aware CORS
-const rawOrigins = process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',').map(o => o.trim()) : [];
+const rawOrigins = process.env.CLIENT_URL
+    ? process.env.CLIENT_URL.split(',').map(o => o.trim().replace(/\/+$/, '')).filter(Boolean)
+    : [];
 const allowedOrigins = rawOrigins.length > 0
     ? rawOrigins
     : (process.env.NODE_ENV === 'production' ? [] : ['http://localhost:5173']);
@@ -34,7 +36,8 @@ app.use(cors({
     origin: (origin, callback) => {
         // Allow requests with no origin (e.g. mobile clients, curl, server-to-server)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) {
+        const normalizedOrigin = origin.trim().replace(/\/+$/, '');
+        if (allowedOrigins.includes(normalizedOrigin)) {
             return callback(null, true);
         }
         return callback(new Error('CORS origin not allowed'));

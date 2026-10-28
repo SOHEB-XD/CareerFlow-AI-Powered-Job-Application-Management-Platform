@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, AlertCircle, CalendarDays, ArrowRight } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
@@ -14,6 +14,7 @@ const Login = () => {
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const shouldReduceMotion = useReducedMotion();
 
   const handleSubmit = async (e) => {
@@ -24,7 +25,10 @@ const Login = () => {
 
     try {
       await login(email.trim(), password);
-      navigate('/dashboard');
+      const destination = location.state?.from?.pathname
+        ? `${location.state.from.pathname}${location.state.from.search || ''}`
+        : '/dashboard';
+      navigate(destination, { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid email or password. Please try again.');
     } finally {

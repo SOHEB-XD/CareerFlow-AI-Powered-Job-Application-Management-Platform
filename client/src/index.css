@@ -253,11 +253,21 @@ body {
   color: var(--color-white);
 }
 
+/* Authentication Loading Container */
+.auth-loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--color-canvas);
+}
+
 /* Loading Spinner */
 .spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--color-black);
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-border);
   border-top-color: var(--color-blue);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
