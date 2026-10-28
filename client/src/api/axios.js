@@ -21,7 +21,8 @@ api.interceptors.response.use(
             const isAuthRoute =
                 url.includes('/auth/me') ||
                 url.includes('/auth/login') ||
-                url.includes('/auth/register');
+                url.includes('/auth/register') ||
+                url.includes('/auth/google');
 
             // When a protected endpoint returns 401 mid-session, notify the app to reset auth state
             if (!isAuthRoute && typeof window !== 'undefined') {

@@ -279,17 +279,33 @@ CLIENT_URL=http://localhost:5173
 # Google Gemini API Key for AI Email Studio & Company Research
 GOOGLE_API_KEY=your_google_gemini_api_key_here
 
+# Google OAuth Web Client ID for Google Sign-In verification
+GOOGLE_CLIENT_ID=your_google_oauth_client_id.apps.googleusercontent.com
+
 # Environment Mode
 NODE_ENV=development
 ```
 
-#### Client Configuration (`client/.env` - Optional)
-Create an optional `.env` file in the `client/` directory for production build URLs:
+#### Client Configuration (`client/.env`)
+Create a `.env` file in the `client/` directory:
 
 ```env
+# Google OAuth Web Client ID for Google Sign-In (public configuration)
+VITE_GOOGLE_CLIENT_ID=your_google_oauth_client_id.apps.googleusercontent.com
+
 # Production domain used for generating sitemap.xml and canonical tags (omit in local dev)
 VITE_SITE_URL=https://your-domain.com
 ```
+
+> [!NOTE]
+> **Google Cloud Console Configuration:**
+> To enable Google Sign-In locally and on Render:
+> 1. Create an OAuth 2.0 Client ID (Web Application) in the [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+> 2. Add the following to **Authorized JavaScript origins**:
+>    - `http://localhost:5173` (local development)
+>    - `https://careerflow-web-157a.onrender.com` (Render production frontend)
+> 3. Provide the same Client ID to both `VITE_GOOGLE_CLIENT_ID` (frontend) and `GOOGLE_CLIENT_ID` (backend).
+> 4. After setting or updating `VITE_GOOGLE_CLIENT_ID` on Render, trigger a frontend rebuild so the Vite bundler embeds the environment variable.
 
 ---
 
@@ -324,7 +340,9 @@ Open `http://localhost:5173` in your browser to access CareerFlow.
 | `JWT_SECRET` | `server/.env` | **Yes** | Cryptographic secret used to sign and verify JSON Web Tokens. | `e2a4b8f... (random 32+ char string)` |
 | `CLIENT_URL` | `server/.env` | No | Comma-delimited list of allowed client origins for CORS. Defaults to `http://localhost:5173`. | `http://localhost:5173` |
 | `GOOGLE_API_KEY` | `server/.env` | **Yes** | API key used to authenticate requests to the Google Gemini model. | `your_google_gemini_api_key` |
+| `GOOGLE_CLIENT_ID` | `server/.env` | No | Google OAuth 2.0 Web Client ID used by the backend to verify ID tokens. | `123456...apps.googleusercontent.com` |
 | `NODE_ENV` | `server/.env` | No | Specifies runtime mode (`development` vs `production`). In production, cookies enforce `secure: true`. | `development` |
+| `VITE_GOOGLE_CLIENT_ID` | `client/.env` | No | Google OAuth Web Client ID used by Google Identity Services in the browser. | `123456...apps.googleusercontent.com` |
 | `VITE_SITE_URL` | `client/.env` | No | Production domain for sitemap and OpenGraph injection during `npm run build`. | `https://careerflow.example.com` |
 
 > [!WARNING]

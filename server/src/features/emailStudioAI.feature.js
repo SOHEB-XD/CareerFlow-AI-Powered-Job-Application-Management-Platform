@@ -627,9 +627,52 @@ const getStudioDrafts = async (req, res) => {
     }
 };
 
+/**
+ * Delete a saved draft by ID (strictly user-scoped)
+ */
+const deleteStudioDraft = async (req, res) => {
+    try {
+        const user = req.user;
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid draft ID.'
+            });
+        }
+
+        const deleted = await Communication.findOneAndDelete({
+            _id: id,
+            user: user._id
+        });
+
+        if (!deleted) {
+            return res.status(404).json({
+                success: false,
+                message: 'Draft communication not found.'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Draft deleted successfully',
+            data: { id: deleted._id }
+        });
+    } catch (error) {
+        console.error('[Email Studio deleteStudioDraft Error]:', error.message);
+        return res.status(500).json({
+            success: false,
+            message: 'An unexpected internal error occurred'
+        });
+    }
+};
+
 module.exports = {
     generateStudioEmail,
     updateStudioDraft,
     getStudioGmailLink,
-    getStudioDrafts
+    getStudioDrafts,
+    deleteStudioDraft
 };
+

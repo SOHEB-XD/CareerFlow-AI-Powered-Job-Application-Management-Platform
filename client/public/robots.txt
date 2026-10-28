@@ -5,6 +5,9 @@ Allow: /
 Allow: /assets/
 Allow: /videos/
 Allow: /favicon.svg
+Allow: /favicon-32x32.png
+Allow: /favicon-16x16.png
+Allow: /favicon.ico
 
 # Disallow direct crawling of backend API routes
 Disallow: /api/

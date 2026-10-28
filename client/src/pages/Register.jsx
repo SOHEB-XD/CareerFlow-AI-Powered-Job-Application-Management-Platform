@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { Eye, EyeOff, AlertCircle, CalendarDays, ArrowRight } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import './Auth.css';
@@ -13,9 +14,29 @@ const Register = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const shouldReduceMotion = useReducedMotion();
+
+  const handleGoogleSuccess = async (credential) => {
+    setError('');
+    setIsSubmitting(true);
+    try {
+      await loginWithGoogle(credential);
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        'Google sign-in was not successful. Please try again or create an account with email.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleError = (errorMessage) => {
+    setError(errorMessage);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,6 +103,19 @@ const Register = () => {
                 <span>{error}</span>
               </div>
             )}
+
+            {/* Google Authentication */}
+            <GoogleSignInButton
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              isLoading={isSubmitting}
+              disabled={isSubmitting}
+              text="continue_with"
+            />
+
+            <div className="cf-auth-divider" aria-hidden="true">
+              <span>or continue with email</span>
+            </div>
 
             <form onSubmit={handleSubmit} className="cf-auth-form" noValidate>
               <div className="cf-form-field">

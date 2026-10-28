@@ -1224,6 +1224,35 @@
   color: #FFFFFF;
 }
 
+.cf-email-studio .studio-draft-btns-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cf-email-studio .studio-btn-delete-draft {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.5);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.cf-email-studio .studio-btn-delete-draft:hover {
+  background-color: #000000;
+  border-color: #000000;
+  color: #FFFFFF;
+}
+
+
 /* ── Responsive Polish ── */
 @media (max-width: 1024px) {
   .cf-email-studio {
@@ -1286,13 +1315,208 @@
   }
 }
 
+/* ── Delete Confirmation Dialog ── */
+.studio-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  animation: studioFadeIn 0.18s ease-out;
+}
+
+@keyframes studioFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.studio-delete-dialog {
+  width: 100%;
+  max-width: 480px;
+  background-color: #FFFFFF;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 16px 48px -8px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  animation: studioModalScaleUp 0.18s ease-out;
+  overflow: hidden;
+}
+
+@keyframes studioModalScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.studio-delete-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background-color: #FFFFFF;
+}
+
+.studio-delete-title {
+  font-family: var(--font-display, 'Sora', sans-serif);
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #000000;
+  margin: 0;
+}
+
+.studio-modal-close-btn {
+  background-color: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.5);
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.studio-modal-close-btn:hover:not(:disabled) {
+  background-color: #000000;
+  color: #FFFFFF;
+  border-color: #000000;
+}
+
+.studio-delete-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  background-color: #FFFFFF;
+}
+
+.studio-delete-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  color: #000000;
+  font-size: 0.8125rem;
+  background-color: #FFFFFF;
+}
+
+.studio-delete-body .delete-confirm-text {
+  font-family: var(--font-sans, 'DM Sans', sans-serif);
+  font-size: 0.9375rem;
+  color: #000000;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.studio-delete-body .delete-confirm-sub {
+  font-family: var(--font-sans, 'DM Sans', sans-serif);
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.6);
+  line-height: 1.4;
+  margin: 0;
+  font-style: italic;
+}
+
+.studio-delete-body .delete-confirm-warning {
+  font-family: var(--font-sans, 'DM Sans', sans-serif);
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.5);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.studio-delete-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  background-color: rgba(0, 0, 0, 0.01);
+}
+
+.studio-btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: #FFFFFF;
+  color: #000000;
+  border: 1px solid #000000;
+  padding: 0.5625rem 1.125rem;
+  border-radius: 4px;
+  font-family: var(--font-display, 'Sora', sans-serif);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.studio-btn-cancel:hover:not(:disabled) {
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.studio-btn-confirm-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0.5625rem 1.25rem;
+  background-color: #000000;
+  color: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  font-family: var(--font-display, 'Sora', sans-serif);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.studio-btn-confirm-delete:hover:not(:disabled) {
+  background-color: var(--color-blue, #0000FF);
+  border-color: var(--color-blue, #0000FF);
+  color: #FFFFFF;
+}
+
+.studio-btn-confirm-delete:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* ── Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
   .cf-email-studio .studio-btn-primary,
   .cf-email-studio .studio-btn-secondary,
   .cf-email-studio .studio-draft-row,
-  .cf-email-studio .studio-btn-load-draft {
+  .cf-email-studio .studio-btn-load-draft,
+  .cf-email-studio .studio-btn-delete-draft,
+  .studio-modal-backdrop,
+  .studio-delete-dialog,
+  .studio-btn-cancel,
+  .studio-btn-confirm-delete {
     transition: none !important;
+    animation: none !important;
   }
 
   .cf-email-studio .studio-spinner,

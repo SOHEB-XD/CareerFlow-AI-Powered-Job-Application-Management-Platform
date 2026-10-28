@@ -21,7 +21,9 @@ import {
   ChevronDown,
   ChevronUp,
   Plus,
-  Minus
+  Minus,
+  Trash2,
+  X
 } from 'lucide-react';
 import { getApplications } from '../api/applications';
 import { getResumes } from '../api/resume';
@@ -29,7 +31,8 @@ import {
   generateStudioEmail,
   updateStudioDraft,
   getStudioDrafts,
-  getStudioGmailLink
+  getStudioGmailLink,
+  deleteStudioDraft
 } from '../api/communications';
 import './Communications.css';
 
@@ -129,6 +132,11 @@ const Communications = () => {
   // ── Recent Saved Drafts ──
   const [recentDrafts, setRecentDrafts] = useState([]);
 
+  // ── Delete Confirmation State ──
+  const [deletingDraft, setDeletingDraft] = useState(null);
+  const [isDeletingDraft, setIsDeletingDraft] = useState(false);
+  const [deleteDraftError, setDeleteDraftError] = useState('');
+
   // ── UI Feedback ──
   const [toast, setToast] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -139,6 +147,26 @@ const Communications = () => {
     const timer = setTimeout(() => setToast(null), 4500);
     return () => clearTimeout(timer);
   }, [toast]);
+
+  // Escape key and scroll lock for Delete Confirmation Dialog
+  useEffect(() => {
+    if (!deletingDraft) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && !isDeletingDraft) {
+        setDeletingDraft(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [deletingDraft, isDeletingDraft]);
 
   const refreshDrafts = useCallback(async () => {
     try {
@@ -538,6 +566,51 @@ const Communications = () => {
         reviewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 150);
+  };
+
+  // ── Delete Draft Handlers ──
+  const handleOpenDeleteModal = (draft) => {
+    setDeletingDraft(draft);
+    setDeleteDraftError('');
+  };
+
+  const handleConfirmDeleteDraft = async () => {
+    if (!deletingDraft?._id) return;
+
+    setIsDeletingDraft(true);
+    setDeleteDraftError('');
+
+    try {
+      const { data } = await deleteStudioDraft(deletingDraft._id);
+      if (data?.success) {
+        const deletedCompanyName = deletingDraft.companyName || 'Saved draft';
+        const deletedId = deletingDraft._id;
+
+        // Remove from visible list
+        setRecentDrafts((prev) => prev.filter((d) => d._id !== deletedId));
+
+        // If currently loaded in editor, clear editor so it does not show stale deleted draft
+        if (activeDraft?.communicationId === deletedId) {
+          setActiveDraft(null);
+          setDraftSubject('');
+          setDraftBody('');
+          setRecipientEmail('');
+          setHasUnsavedEdits(false);
+        }
+
+        setDeletingDraft(null);
+        setToast({
+          type: 'success',
+          text: `Deleted saved draft for ${deletedCompanyName}.`
+        });
+      }
+    } catch (err) {
+      setDeleteDraftError(
+        err.response?.data?.message || 'Failed to delete draft. Please try again.'
+      );
+    } finally {
+      setIsDeletingDraft(false);
+    }
   };
 
   return (
@@ -1164,14 +1237,28 @@ const Communications = () => {
                         </div>
                       </div>
 
-                      {/* Right Meta & Load Button */}
+                      {/* Right Meta & Actions */}
                       <div className="studio-draft-row-actions">
                         <span className="studio-draft-date">
                           {formatDate(d.updatedAt || d.createdAt)}
                         </span>
-                        <span className="studio-btn-load-draft">
-                          {isCurrentActive ? 'Viewing' : 'Load draft'}
-                        </span>
+                        <div className="studio-draft-btns-group">
+                          <span className="studio-btn-load-draft">
+                            {isCurrentActive ? 'Viewing' : 'Load draft'}
+                          </span>
+                          <button
+                            type="button"
+                            className="studio-btn-delete-draft"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenDeleteModal(d);
+                            }}
+                            title={`Delete draft for ${d.companyName}`}
+                            aria-label={`Delete draft for ${d.companyName}`}
+                          >
+                            <Trash2 size={13} strokeWidth={1.8} aria-hidden="true" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -1179,6 +1266,78 @@ const Communications = () => {
               </div>
             </section>
           )}
+        </div>
+      )}
+
+      {/* ── Delete Draft Confirmation Dialog ── */}
+      {deletingDraft && (
+        <div 
+          className="modal-backdrop studio-modal-backdrop" 
+          onClick={() => !isDeletingDraft && setDeletingDraft(null)}
+        >
+          <div 
+            className="modal-dialog modal-dialog-delete studio-delete-dialog"
+            onClick={(e) => e.stopPropagation()}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-draft-title"
+            aria-describedby="delete-draft-desc"
+          >
+            <div className="modal-header studio-delete-header">
+              <h2 id="delete-draft-title" className="modal-title studio-delete-title">
+                Delete Saved Draft
+              </h2>
+              <button 
+                type="button" 
+                className="studio-modal-close-btn" 
+                onClick={() => !isDeletingDraft && setDeletingDraft(null)}
+                aria-label="Close delete confirmation"
+                disabled={isDeletingDraft}
+              >
+                <X size={16} strokeWidth={2} />
+              </button>
+            </div>
+
+            <div className="modal-body studio-delete-body">
+              {deleteDraftError && (
+                <div className="app-alert app-alert-error studio-delete-alert" role="alert">
+                  <AlertCircle size={15} strokeWidth={2} />
+                  <span>{deleteDraftError}</span>
+                </div>
+              )}
+
+              <p id="delete-draft-desc" className="delete-confirm-text">
+                Are you sure you want to delete your saved draft for{' '}
+                <strong>{deletingDraft.companyName}</strong>
+                {deletingDraft.role ? ` (${deletingDraft.role})` : ''}?
+              </p>
+              <p className="delete-confirm-sub">
+                Subject: &ldquo;{deletingDraft.subject || 'Untitled Draft'}&rdquo;
+              </p>
+              <p className="delete-confirm-warning">
+                This action cannot be undone. The draft will be permanently removed from your saved communications.
+              </p>
+            </div>
+
+            <div className="modal-footer studio-delete-footer">
+              <button
+                type="button"
+                className="btn-secondary studio-btn-cancel"
+                onClick={() => setDeletingDraft(null)}
+                disabled={isDeletingDraft}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn-destructive studio-btn-confirm-delete"
+                onClick={handleConfirmDeleteDraft}
+                disabled={isDeletingDraft}
+              >
+                {isDeletingDraft ? 'Deleting...' : 'Delete Draft'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

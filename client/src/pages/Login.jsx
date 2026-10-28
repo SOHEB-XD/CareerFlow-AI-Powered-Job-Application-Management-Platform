@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { Eye, EyeOff, AlertCircle, CalendarDays, ArrowRight } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import './Auth.css';
@@ -12,10 +13,33 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const shouldReduceMotion = useReducedMotion();
+
+  const handleGoogleSuccess = async (credential) => {
+    setError('');
+    setIsSubmitting(true);
+    try {
+      await loginWithGoogle(credential);
+      const destination = location.state?.from?.pathname
+        ? `${location.state.from.pathname}${location.state.from.search || ''}`
+        : '/dashboard';
+      navigate(destination, { replace: true });
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        'Google sign-in was not successful. Please try again or sign in with your email.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleError = (errorMessage) => {
+    setError(errorMessage);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -70,6 +94,19 @@ const Login = () => {
                 <span>{error}</span>
               </div>
             )}
+
+            {/* Google Authentication */}
+            <GoogleSignInButton
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              isLoading={isSubmitting}
+              disabled={isSubmitting}
+              text="continue_with"
+            />
+
+            <div className="cf-auth-divider" aria-hidden="true">
+              <span>or continue with email</span>
+            </div>
 
             <form onSubmit={handleSubmit} className="cf-auth-form" noValidate>
               <div className="cf-form-field">

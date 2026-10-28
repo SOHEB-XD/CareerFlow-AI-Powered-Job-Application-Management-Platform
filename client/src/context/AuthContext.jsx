@@ -68,6 +68,15 @@ export const AuthProvider = ({ children }) => {
         return data;
     };
 
+    const loginWithGoogle = async (credential) => {
+        const { data } = await api.post('/auth/google', { credential });
+        if (data.success && data.user) {
+            setUser(data.user);
+            setLoading(false);
+        }
+        return data;
+    };
+
     const logout = async () => {
         inFlightCheckRef.current = null;
         try {
@@ -82,7 +91,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated: !!user, loading, login, register, logout, refreshUser: checkAuth }}>
+        <AuthContext.Provider value={{ user, isAuthenticated: !!user, loading, login, register, logout, loginWithGoogle, refreshUser: checkAuth }}>
             {children}
         </AuthContext.Provider>
     );

@@ -21,7 +21,8 @@ const {
     generateStudioEmail,
     updateStudioDraft,
     getStudioGmailLink,
-    getStudioDrafts
+    getStudioDrafts,
+    deleteStudioDraft
 } = require('../features/emailStudioAI.feature');
 
 /**
@@ -67,6 +68,7 @@ router.get('/communications', protect, getCommunications);
 router.get('/communications/drafts', protect, getStudioDrafts);
 router.post('/communications/generate', protect, aiLimiter, generateStudioEmail);
 router.put('/communications/:id/draft', protect, updateStudioDraft);
+router.delete('/communications/:id/draft', protect, deleteStudioDraft);
 router.get('/communications/:id/gmail-link', protect, getStudioGmailLink);
 
 module.exports = router;

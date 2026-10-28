@@ -19,10 +19,22 @@ const userSchema = new Schema({
     },
     password: {
         type: String,
-        required: true,
+        required: function () {
+            return !this.googleId;
+        },
         minlength: [6, 'Password must be at least 6 characters long'],
-        maxlength: [100, 'Password must be less than 100 characters long'],
-
+        maxlength: [100, 'Password must be less than 100 characters long']
+    },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true,
+        trim: true
+    },
+    authProvider: {
+        type: String,
+        enum: ['local', 'google'],
+        default: 'local'
     }
 }, { timestamps: true });
 

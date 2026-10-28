@@ -32,3 +32,12 @@ export const getStudioDrafts = () => {
 export const getStudioGmailLink = (id, params = {}) => {
   return api.get(`/features/communications/${id}/gmail-link`, { params });
 };
+
+/**
+ * Delete a saved draft by ID.
+ * @param {string} id - Communication ID
+ */
+export const deleteStudioDraft = (id) => {
+  return api.delete(`/features/communications/${id}/draft`);
+};
+
